@@ -13,8 +13,8 @@ enum class SendProtocol(val port: Int) {
 }
 
 data class Account(var remote_income_server: String,
-                   var remote_income_port: Int,
                    var remote_income_protocol: ReciveProtocol,
-                   var use_starttls_income: Boolean,
+                   var remote_income_port: Int = remote_income_protocol.port,
+                   var use_starttls_income: Boolean = false,
                    var mail_adress: String,
                    var password: String)
