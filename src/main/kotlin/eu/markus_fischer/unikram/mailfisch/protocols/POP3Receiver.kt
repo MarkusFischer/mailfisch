@@ -42,9 +42,7 @@ class POP3Receiver (val session: Session) : IReceiver {
         return Pair(success, pop3_status.toList())
     }
 
-    override fun isAlive(): Boolean {
-        return sendCommand("NOOP").first
-    }
+    override fun isAlive(): Boolean = sendCommand("NOOP").first
 
     override fun authenticate(user: String, password: String) : Boolean {
         if (sendCommand("USER", arg1=user).first) {
@@ -54,23 +52,32 @@ class POP3Receiver (val session: Session) : IReceiver {
         }
     }
 
-    override fun getMailCount() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun getMailCount() : Pair<Boolean, Int> {
+        val result = sendCommand("LIST", multiple_return_values = true)
+        if (result.first) {
+            //TODO parse message count
+        } else {
+            return Pair(result.first, -1)
+        }
     }
 
-    override fun getMail(id: Int) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun getMail(id: Int) : Pair<Boolean, String> {
+        val mail = sendCommand("RETR", arg1 = id.toString(), multiple_return_values = true)
+        if (mail.first) {
+            var result = ""
+            for (line in mail.second.subList(1, mail.second.size)) {
+                result += line
+                result += "\n"
+            }
+            return Pair(true, result)
+        } else {
+            return Pair(false, "")
+        }
     }
 
-    override fun quit() : Boolean{
-        return sendCommand("QUIT").first
-    }
+    override fun quit() = sendCommand("QUIT").first
 
-    override fun markMailForDeletion(id: Int) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun markMailForDeletion(id: Int) = sendCommand("DELE", arg1 = id.toString()).first
 
-    override fun resetDeletion() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun resetDeletion() = sendCommand("RSET").first
 }
