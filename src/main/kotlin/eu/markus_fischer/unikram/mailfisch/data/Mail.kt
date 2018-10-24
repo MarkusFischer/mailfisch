@@ -14,6 +14,7 @@ open class Mail (val orig_date : String,
                  val comments : String,
                  val keywords : String,
                  val optional_field : List<String>,
+                 val original_header : String,
                  val content : String){
 
     override fun toString(): String {
@@ -40,9 +41,15 @@ fun parse_mail(raw_mail : String) : Mail {
                 comments = "",
                 keywords = "",
                 optional_field = listOf(),
+                original_header = "",
                 content = "")
     }
     val splitted_mail = raw_mail.split(Regex("(?m)^$"), limit = 2)
+    //parse header keys
+    val fws_free_header = remove_folded_whitespaces(splitted_mail[0])
+    println(fws_free_header)
+    //val subject = Regex("Subject[\t ]*:(((((([\t ]*\r\n)?[\t ]+)|([\t ]+(\r\n[\t ]+)))?\\p{Print})*[\t ]*)|((\n*\r*((\\x00|([\\x01-\\x08]|\\x0b|\\x0c|[\\x0e-\\x1f]|\\x7f)|\\p{Print})\n*\r*)*)|((([\t ]*\r\n)?[\t ]+)|([\t ]+(\r\n[\t ]+))))*)\r\n").find(splitted_mail[0])
+    print("matched")
     return Mail(orig_date = "",
                 from = "",
                 sender = "",
@@ -57,5 +64,8 @@ fun parse_mail(raw_mail : String) : Mail {
                 comments = "",
                 keywords = "",
                 optional_field = listOf(),
+                original_header = splitted_mail[0],
                 content = splitted_mail[1])
 }
+
+fun remove_folded_whitespaces(header : String) : String = header.replace(Regex("((([\t ]*\n)?[\t ]+)|([\t ]+(\n[\t ]+)))"), " ")
