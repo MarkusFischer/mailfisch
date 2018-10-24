@@ -56,7 +56,7 @@ class POP3Receiver (val session: Session) : IReceiver {
     override fun getMailCount() : Pair<Boolean, Int> {
         val result = sendCommand("LIST", multiple_return_values = true)
         if (result.first) {
-            val splitted_status_line = result.second[1].split(' ')
+            val splitted_status_line = result.second[0].split(' ')
             return Pair(result.first, splitted_status_line[1].toInt())
         } else {
             return Pair(result.first, -1)

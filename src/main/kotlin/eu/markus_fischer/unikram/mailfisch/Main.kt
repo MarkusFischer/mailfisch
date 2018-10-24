@@ -24,6 +24,8 @@ fun main(args : Array<String>) {
             println("Successfull init")
             if (receiver.authenticate(test_account.user, test_account.password)) {
                 println("Successfully authenticated!")
+                val mailcount = receiver.getMailCount().second
+                println("Mailcount: $mailcount")
             } else {
                 println("Something went wrong during authentication")
             }
