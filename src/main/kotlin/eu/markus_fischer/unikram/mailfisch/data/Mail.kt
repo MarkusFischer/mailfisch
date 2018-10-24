@@ -25,7 +25,8 @@ open class Mail (val orig_date : String,
 }
 
 fun parse_mail(raw_mail : String) : Mail {
-    return Mail(orig_date = "",
+    if (raw_mail == "") {
+        return Mail(orig_date = "",
                 from = "",
                 sender = "",
                 reply_to = "",
@@ -40,4 +41,21 @@ fun parse_mail(raw_mail : String) : Mail {
                 keywords = "",
                 optional_field = listOf(),
                 content = "")
+    }
+    val splitted_mail = raw_mail.split(Regex("(?m)^$"), limit = 2)
+    return Mail(orig_date = "",
+                from = "",
+                sender = "",
+                reply_to = "",
+                to = "",
+                cc = "",
+                bcc = "",
+                message_id = "",
+                in_reply_to = "",
+                references = "",
+                subject = "",
+                comments = "",
+                keywords = "",
+                optional_field = listOf(),
+                content = splitted_mail[1])
 }

@@ -2,6 +2,7 @@ package eu.markus_fischer.unikram.mailfisch
 
 import eu.markus_fischer.unikram.mailfisch.data.Account
 import eu.markus_fischer.unikram.mailfisch.data.ReceiveProtocol
+import eu.markus_fischer.unikram.mailfisch.data.parse_mail
 import eu.markus_fischer.unikram.mailfisch.network.Session
 import eu.markus_fischer.unikram.mailfisch.protocols.IReceiver
 import eu.markus_fischer.unikram.mailfisch.protocols.POP3Receiver
@@ -24,8 +25,8 @@ fun main(args : Array<String>) {
             println("Successfull init")
             if (receiver.authenticate(test_account.user, test_account.password)) {
                 println("Successfully authenticated!")
-                val mailcount = receiver.getMailCount().second
-                println("Mailcount: $mailcount")
+                val mail = receiver.getMail(2).second
+                println("Mail 2: $mail")
             } else {
                 println("Something went wrong during authentication")
             }

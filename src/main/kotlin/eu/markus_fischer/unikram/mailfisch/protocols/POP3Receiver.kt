@@ -1,5 +1,7 @@
 package eu.markus_fischer.unikram.mailfisch.protocols
 
+import eu.markus_fischer.unikram.mailfisch.data.Mail
+import eu.markus_fischer.unikram.mailfisch.data.parse_mail
 import eu.markus_fischer.unikram.mailfisch.network.Session
 import java.io.*
 
@@ -63,7 +65,7 @@ class POP3Receiver (val session: Session) : IReceiver {
         }
     }
 
-    override fun getMail(id: Int) : Pair<Boolean, String> {
+    override fun getMail(id: Int) : Pair<Boolean, Mail> {
         val mail = sendCommand("RETR", arg1 = id.toString(), multiple_return_values = true)
         if (mail.first) {
             var result = ""
@@ -71,9 +73,9 @@ class POP3Receiver (val session: Session) : IReceiver {
                 result += line
                 result += "\n"
             }
-            return Pair(true, result)
+            return Pair(true, parse_mail(result))
         } else {
-            return Pair(false, "")
+            return Pair(false, parse_mail(""))
         }
     }
 
