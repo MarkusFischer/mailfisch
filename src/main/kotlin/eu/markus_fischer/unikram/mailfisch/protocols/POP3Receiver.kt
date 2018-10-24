@@ -7,6 +7,7 @@ class POP3Receiver (val session: Session) : IReceiver {
 
     private var input_stream : BufferedReader? = null
     private var output_stream : PrintStream? = null
+    private var mail_marked_for_deletion = false
 
     private enum class Status{
         OK,
@@ -55,7 +56,8 @@ class POP3Receiver (val session: Session) : IReceiver {
     override fun getMailCount() : Pair<Boolean, Int> {
         val result = sendCommand("LIST", multiple_return_values = true)
         if (result.first) {
-            //TODO parse message count
+            val splitted_status_line = result.second[1].split(' ')
+            return Pair(result.first, splitted_status_line[1].toInt())
         } else {
             return Pair(result.first, -1)
         }
@@ -75,9 +77,30 @@ class POP3Receiver (val session: Session) : IReceiver {
         }
     }
 
-    override fun quit() = sendCommand("QUIT").first
+    override fun quit() : Boolean {
+        if (sendCommand("QUIT").first) {
+            mail_marked_for_deletion = false
+            return true
+        } else {
+            return false
+        }
+    }
 
-    override fun markMailForDeletion(id: Int) = sendCommand("DELE", arg1 = id.toString()).first
+    override fun markMailForDeletion(id: Int) : Boolean {
+        if (sendCommand("DELE", arg1 = id.toString()).first) {
+            mail_marked_for_deletion = true
+            return true
+        } else {
+            return false
+        }
+    }
 
-    override fun resetDeletion() = sendCommand("RSET").first
+    override fun resetDeletion() : Boolean {
+        if (sendCommand("RSET").first) {
+            mail_marked_for_deletion = false
+            return true
+        } else {
+            return false
+        }
+    }
 }
