@@ -73,9 +73,9 @@ class POP3Receiver (val session: Session) : IReceiver {
                 result += line
                 result += "\n"
             }
-            return Pair(true, parse_mail(result))
+            return Pair(true, Mail(result))
         } else {
-            return Pair(false, parse_mail(""))
+            return Pair(false, Mail())
         }
     }
 
