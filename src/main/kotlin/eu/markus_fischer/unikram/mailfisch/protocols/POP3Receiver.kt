@@ -1,7 +1,6 @@
 package eu.markus_fischer.unikram.mailfisch.protocols
 
 import eu.markus_fischer.unikram.mailfisch.data.Mail
-import eu.markus_fischer.unikram.mailfisch.data.parse_mail
 import eu.markus_fischer.unikram.mailfisch.network.Session
 import java.io.*
 
