@@ -34,6 +34,8 @@ open class Mail (private var headers : MutableMap<String, Header> = mutableMapOf
 
     fun getAllHeaderKeys() = headers.keys.toString()
 
+    fun getHeader(name : String) : Header = headers.get(name) ?: Header(name, "")
+
     private fun unfold(entry : String) : String = entry.replace(Regex("((([\t ]*\n)?[\t ]+)|([\t ]+(\n[\t ]+)))"), " ")
 
     override fun toString(): String {

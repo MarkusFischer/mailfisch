@@ -10,6 +10,8 @@ class POP3Receiver (val session: Session) : IReceiver {
     private var output_stream : PrintStream? = null
     private var mail_marked_for_deletion = false
 
+    private var quit_performed = false
+
     private enum class Status{
         OK,
         ERR
@@ -79,8 +81,9 @@ class POP3Receiver (val session: Session) : IReceiver {
     }
 
     override fun quit() : Boolean {
-        if (sendCommand("QUIT").first) {
+        if (quit_performed || sendCommand("QUIT").first) {
             mail_marked_for_deletion = false
+            quit_performed = true
             return true
         } else {
             return false
