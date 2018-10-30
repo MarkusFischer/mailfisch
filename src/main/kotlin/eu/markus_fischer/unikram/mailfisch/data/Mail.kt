@@ -26,7 +26,12 @@ open class Mail (private var headers : MutableMap<String, Header> = mutableMapOf
 
     fun addHeader(name : String, value : String) {
         if (isPureASCII(name) && isPureASCII(value)) {
-            headers.put(name, Header(name, HeaderValueString(value)))
+            var headerValue : HeaderValue
+            when(name) {
+                "Date", "Resent-Date" -> headerValue = HeaderValueDate(value)
+                else -> headerValue = HeaderValueString(value)
+            }
+            headers.put(name, Header(name, headerValue))
         } else {
             throw IllegalArgumentException("The header was not encoded in US-ASCII!")
         }
