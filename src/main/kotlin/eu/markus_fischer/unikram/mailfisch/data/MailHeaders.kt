@@ -40,7 +40,7 @@ class HeaderValueDate( date : ZonedDateTime) : HeaderValue {
 
     constructor(date_string : String) : this(ZonedDateTime.parse(date_string, DateTimeFormatter.RFC_1123_DATE_TIME))
 
-    override fun toString() = DateTimeFormatter.RFC_1123_DATE_TIME.format(date)
+    override fun toString(): String = DateTimeFormatter.RFC_1123_DATE_TIME.format(date)
 
     override fun getFoldRepresentation(header_name_offset: Int): String = toString()
 
