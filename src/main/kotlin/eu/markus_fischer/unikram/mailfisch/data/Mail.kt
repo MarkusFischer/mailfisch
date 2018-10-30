@@ -26,7 +26,7 @@ open class Mail (private var headers : MutableMap<String, Header> = mutableMapOf
 
     fun addHeader(name : String, value : String) {
         if (isPureASCII(name) && isPureASCII(value)) {
-            headers.put(name, Header(name, value))
+            headers.put(name, Header(name, HeaderValueString(value)))
         } else {
             throw IllegalArgumentException("The header was not encoded in US-ASCII!")
         }
@@ -34,7 +34,7 @@ open class Mail (private var headers : MutableMap<String, Header> = mutableMapOf
 
     fun getAllHeaderKeys() = headers.keys.toString()
 
-    fun getHeader(name : String) : Header = headers.get(name) ?: Header(name, "")
+    fun getHeader(name : String) : Header = headers.get(name) ?: Header(name, HeaderValueString(""))
 
     private fun unfold(entry : String) : String = entry.replace(Regex("((([\t ]*\n)?[\t ]+)|([\t ]+(\n[\t ]+)))"), " ")
 

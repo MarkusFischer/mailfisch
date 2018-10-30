@@ -83,6 +83,7 @@ class POP3Receiver (val session: Session) : IReceiver {
     override fun quit() : Boolean {
         if (quit_performed || sendCommand("QUIT").first) {
             mail_marked_for_deletion = false
+            //TODO work around to fix hanging quit when quit was called twice
             quit_performed = true
             return true
         } else {
