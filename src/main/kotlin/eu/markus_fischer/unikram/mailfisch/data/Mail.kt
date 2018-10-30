@@ -12,7 +12,7 @@ open class Mail (private var headers : MutableMap<String, Header> = mutableMapOf
         //subject = Regex("Subject[\t ]*:(([\t \\p{Print}]*[\t ]*)|((\n*\r*([^\t\n\r]\n*\r*)*)|[\t ]*)*)\n").find(unfolded_header)?.value?.split(':')?.get(1) ?: ""
         for (line in unfolded_header.trim().lines()) {
             val (key, value) = line.split(':', limit=2)
-            addHeader(key.trim(), value)
+            addHeader(key.trim(), value.trim())
         }
         raw_header = splitted_mail[0]
         raw_content = splitted_mail[1]
