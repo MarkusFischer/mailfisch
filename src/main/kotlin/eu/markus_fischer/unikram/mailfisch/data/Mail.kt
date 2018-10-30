@@ -22,7 +22,8 @@ open class Mail (private var headers : MutableMap<String, Header> = mutableMapOf
 
     }
 
-    protected fun isPureASCII(str : String) : Boolean = Charset.forName("US-ASCII").newEncoder().canEncode(str)
+    protected val ascii_encoder = Charset.forName("US-ASCII").newEncoder()
+    protected fun isPureASCII(str : String) : Boolean = ascii_encoder.canEncode(str)
 
     fun addHeader(name : String, value : String) {
         if (isPureASCII(name) && isPureASCII(value)) {
