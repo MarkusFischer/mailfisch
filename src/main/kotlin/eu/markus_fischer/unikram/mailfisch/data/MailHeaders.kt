@@ -1,5 +1,8 @@
 package eu.markus_fischer.unikram.mailfisch.data
 
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
+
 class Header(var name : String, var value : HeaderValue) {
     fun getFoldedHeader() : String = "$name: ${value.getFoldRepresentation(name.length)}"
     override fun toString(): String = "$name: $value"
@@ -29,6 +32,17 @@ class HeaderValueString(var value : String) : HeaderValue {
         }
         return "$result\n"
     }
+}
+
+class HeaderValueDate( date : ZonedDateTime) : HeaderValue {
+    var date : ZonedDateTime = date
+        set(value) {}
+
+    constructor(date_string : String) : this(ZonedDateTime.parse(date_string, DateTimeFormatter.RFC_1123_DATE_TIME))
+
+    override fun toString() = DateTimeFormatter.RFC_1123_DATE_TIME.format(date)
+
+    override fun getFoldRepresentation(header_name_offset: Int): String = toString()
 
 }
 
