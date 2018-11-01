@@ -6,7 +6,20 @@ import eu.markus_fischer.unikram.mailfisch.network.Session
 import eu.markus_fischer.unikram.mailfisch.protocols.IReceiver
 import eu.markus_fischer.unikram.mailfisch.protocols.POP3Receiver
 
-fun main(args : Array<String>) {
+fun main(args: Array<String>) {
+    var running = true
+    while (running) {
+        print("Insert: ")
+        val input = readLine()!!
+        if (input == "q") {
+            running = false
+        } else {
+            println("In: $input out: ${removeRFC5322Comments(input)}")
+        }
+    }
+}
+
+/*fun main(args : Array<String>) {
     println("mailfisch v1")
     println("simple pop3 client")
     print("Please enter the remote hostname: ")
@@ -82,4 +95,4 @@ fun main(args : Array<String>) {
             income_session.close_connection()
         }
     }
-}
+}*/
