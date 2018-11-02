@@ -14,7 +14,7 @@ class Mailbox (var display_name : String,
         private set
 
     constructor(mailbox_string : String) : this("", "", "") {
-        val working_string = removeRFC5322Comments(mailbox_string).replace("\n", "")
+        val working_string = removeRFC5322Comments(mailbox_string).replace("\n", "").trim()
         var escape_sequence_beginning = false
         var inside_quote = false
         var split_pos_local_global = -1
@@ -78,7 +78,7 @@ class Mailbox (var display_name : String,
         return true
     }
 
-    override fun toString(): String = "$display_name<${getMailAddress()}>"
+    override fun toString(): String = if (display_name != "") "$display_name<${getMailAddress()}>" else getMailAddress()
 
     fun getMailAddress() : String = "$local_part@$domain"
 
