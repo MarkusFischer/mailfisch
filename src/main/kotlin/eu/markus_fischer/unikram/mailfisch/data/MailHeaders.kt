@@ -44,20 +44,14 @@ class HeaderValueDate(var date : ZonedDateTime) : HeaderValue {
 
 }
 
-class HeaderValueMailbox(var mailbox : Mailbox) : HeaderValue {
-
-    override fun toString(): String = mailbox.toString()
-
-    override fun getFoldRepresentation(header_name_offset: Int): String = mailbox.toString()
-
-}
-
-class HeaderValueMailboxList(var mailbox_list : MutableList<Mailbox>) : HeaderValue {
+class HeaderValueMailboxList(var mailbox_list : MutableList<Mailbox>, val single_mailbox : Boolean = false) : HeaderValue {
     override fun toString() : String {
         if (mailbox_list.size >= 1) {
             var result = "${mailbox_list[0]}"
-            for (i in 1..mailbox_list.size - 1) {
-                result += ",${mailbox_list[i]}"
+            if (!single_mailbox) {
+                for (i in 1..mailbox_list.size - 1) {
+                    result += ",${mailbox_list[i]}"
+                }
             }
             return result
         } else {
