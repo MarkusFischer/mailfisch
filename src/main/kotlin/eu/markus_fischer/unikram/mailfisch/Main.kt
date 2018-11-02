@@ -1,11 +1,6 @@
 package eu.markus_fischer.unikram.mailfisch
 
-import eu.markus_fischer.unikram.mailfisch.data.Account
-import eu.markus_fischer.unikram.mailfisch.data.Mailbox
-import eu.markus_fischer.unikram.mailfisch.data.ReceiveProtocol
-import eu.markus_fischer.unikram.mailfisch.network.Session
-import eu.markus_fischer.unikram.mailfisch.protocols.IReceiver
-import eu.markus_fischer.unikram.mailfisch.protocols.POP3Receiver
+import eu.markus_fischer.unikram.mailfisch.data.adresses.Mailbox
 
 fun main(args: Array<String>) {
     var running = true

@@ -1,4 +1,4 @@
-package eu.markus_fischer.unikram.mailfisch.data
+package eu.markus_fischer.unikram.mailfisch.data.adresses
 
 import eu.markus_fischer.unikram.mailfisch.removeRFC5322Comments
 
@@ -67,24 +67,9 @@ class Mailbox (var display_name : String,
         }
     }
 
-    private fun isVaildLocalPart(local : Boolean) : Boolean {
-        return true
-    }
-
-    private fun isValidDomain(domain : Boolean) : Boolean {
-        return true
-    }
-
     override fun toString(): String = if (display_name != "") "$display_name<${getMailAddress()}>" else getMailAddress()
 
     fun getMailAddress() : String = "$local_part@$domain"
-
-    override fun hashCode(): Int {
-        var result = display_name.hashCode()
-        result = 31 * result + local_part.hashCode()
-        result = 31 * result + domain.hashCode()
-        return result
-    }
 
 }
 
