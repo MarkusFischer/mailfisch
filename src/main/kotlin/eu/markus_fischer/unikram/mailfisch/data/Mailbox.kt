@@ -8,10 +8,10 @@ class Mailbox (var display_name : String,
                domain : String) {
 
     var local_part : String = local_part
-        set(v) {}
+        private set
 
     var domain : String = domain
-        set(v) {}
+        private set
 
     constructor(mailbox_string : String) : this("", "", "") {
         val working_string = removeRFC5322Comments(mailbox_string).replace("\n", "")
@@ -59,12 +59,14 @@ class Mailbox (var display_name : String,
                 }
             }
         }
-        domain = mailbox_string.substring(split_pos_local_global + 1, mailbox_string.length)
+
         if (name_adr) {
-            display_name = mailbox_string.substring(0, angel_adr_begin_pos + 1)
+            display_name = mailbox_string.substring(0, angel_adr_begin_pos)
             local_part = mailbox_string.substring(angel_adr_begin_pos + 1, split_pos_local_global)
+            domain = mailbox_string.substring(split_pos_local_global + 1, mailbox_string.length - 1)
         } else {
             local_part = mailbox_string.substring(0, split_pos_local_global)
+            domain = mailbox_string.substring(split_pos_local_global + 1, mailbox_string.length)
         }
     }
 

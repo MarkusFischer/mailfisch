@@ -1,6 +1,7 @@
 package eu.markus_fischer.unikram.mailfisch
 
 import eu.markus_fischer.unikram.mailfisch.data.Account
+import eu.markus_fischer.unikram.mailfisch.data.Mailbox
 import eu.markus_fischer.unikram.mailfisch.data.ReceiveProtocol
 import eu.markus_fischer.unikram.mailfisch.network.Session
 import eu.markus_fischer.unikram.mailfisch.protocols.IReceiver
@@ -14,7 +15,7 @@ fun main(args: Array<String>) {
         if (input == "q") {
             running = false
         } else {
-            println("In: $input out: ${removeRFC5322Comments(input)}")
+            println("In: $input out: ${Mailbox(input).toString()}")
         }
     }
 }
