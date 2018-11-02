@@ -29,10 +29,7 @@ class Mailbox (var display_name : String,
                         escape_sequence_beginning = false
                 }
                 '\\' -> {
-                    if (!escape_sequence_beginning)
-                        escape_sequence_beginning = true
-                    else
-                        escape_sequence_beginning = false
+                    escape_sequence_beginning = !escape_sequence_beginning
                 }
                 '<' -> {
                     if (!escape_sequence_beginning) {
