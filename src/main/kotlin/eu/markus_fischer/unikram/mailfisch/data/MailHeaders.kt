@@ -1,5 +1,6 @@
 package eu.markus_fischer.unikram.mailfisch.data
 
+import eu.markus_fischer.unikram.mailfisch.data.addresses.Address
 import eu.markus_fischer.unikram.mailfisch.data.addresses.Mailbox
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
@@ -61,10 +62,21 @@ class HeaderValueMailboxList(var mailbox_list : MutableList<Mailbox>, val single
     }
 
     override fun getFoldRepresentation(header_name_offset: Int): String = toString()
-
 }
 
-class HeaderTokenizer(val raw_header_line : String,
-                      val ignore_comments : Boolean = true) {
-    private var tokens : MutableList<String> = mutableListOf()
+class HeaderValueAddressList(var address_list : MutableList<Address>, val single_mailbox: Boolean = false) : HeaderValue {
+    override fun toString() : String {
+        if (address_list.size >= 1) {
+            var result = "${address_list[0]}"
+            if (!single_mailbox) {
+                for (i in 1..address_list.size - 1) {
+                    result += ",${address_list[i]}"
+                }
+            }
+            return result
+        } else {
+            return "" //TODO throw exception?
+        }
+    }
+    override fun getFoldRepresentation(header_name_offset: Int): String = toString()
 }
