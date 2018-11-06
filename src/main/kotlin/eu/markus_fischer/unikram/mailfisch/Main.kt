@@ -1,7 +1,14 @@
 package eu.markus_fischer.unikram.mailfisch
 
+import eu.markus_fischer.unikram.mailfisch.data.Account
+import eu.markus_fischer.unikram.mailfisch.data.ReceiveProtocol
 import eu.markus_fischer.unikram.mailfisch.data.addresses.Mailbox
+import eu.markus_fischer.unikram.mailfisch.network.SSLSession
+import eu.markus_fischer.unikram.mailfisch.network.Session
+import eu.markus_fischer.unikram.mailfisch.protocols.IReceiver
+import eu.markus_fischer.unikram.mailfisch.protocols.POP3Receiver
 
+/*
 fun main(args: Array<String>) {
     var running = true
     while (running) {
@@ -14,8 +21,8 @@ fun main(args: Array<String>) {
         }
     }
 }
-
-/*fun main(args : Array<String>) {
+*/
+fun main(args : Array<String>) {
     println("mailfisch v1")
     println("simple pop3 client")
     print("Please enter the remote hostname: ")
@@ -26,14 +33,19 @@ fun main(args: Array<String>) {
     val user = readLine()!!
     print("Please enter your passwort: ")
     val password = readLine()!!
+    print("Use ssl? (y) or (n): ")
+    val use_ssl = readLine()!!
     val test_account = Account(remote_income_server = hostname,
-                                remote_income_protocol = ReceiveProtocol.POP3,
+                                remote_income_protocol = if (use_ssl == "y") ReceiveProtocol.POP3S else ReceiveProtocol.POP3,
                                 remote_income_port = port,
                                 mail_adress = "mf.dev@mail.de",
                                 user = user,
                                 password = password)
     println("Create session")
-    val income_session = Session(test_account.remote_income_server, test_account.remote_income_port)
+    val income_session = if (test_account.remote_income_protocol == ReceiveProtocol.POP3S)
+                                SSLSession(test_account.remote_income_server, test_account.remote_income_port) else
+                                Session(test_account.remote_income_server, test_account.remote_income_port)
+
     println("Connecting... ")
     val success = income_session.establish_connection()
     println("Connected? $success")
@@ -91,4 +103,4 @@ fun main(args: Array<String>) {
             income_session.close_connection()
         }
     }
-}*/
+}
