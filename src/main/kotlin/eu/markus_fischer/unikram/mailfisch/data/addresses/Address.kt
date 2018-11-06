@@ -1,4 +1,4 @@
-package eu.markus_fischer.unikram.mailfisch.data.adresses
+package eu.markus_fischer.unikram.mailfisch.data.addresses
 
 class Address {
     var mailbox : Mailbox = Mailbox("", "", "")

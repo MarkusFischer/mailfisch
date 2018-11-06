@@ -1,6 +1,6 @@
 package eu.markus_fischer.unikram.mailfisch
 
-import eu.markus_fischer.unikram.mailfisch.data.adresses.Mailbox
+import eu.markus_fischer.unikram.mailfisch.data.addresses.Mailbox
 
 fun main(args: Array<String>) {
     var running = true

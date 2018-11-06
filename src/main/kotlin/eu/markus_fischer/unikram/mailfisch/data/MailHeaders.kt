@@ -1,6 +1,6 @@
 package eu.markus_fischer.unikram.mailfisch.data
 
-import eu.markus_fischer.unikram.mailfisch.data.adresses.Mailbox
+import eu.markus_fischer.unikram.mailfisch.data.addresses.Mailbox
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
