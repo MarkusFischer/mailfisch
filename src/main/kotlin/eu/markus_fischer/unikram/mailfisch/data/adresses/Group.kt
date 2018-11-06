@@ -20,6 +20,6 @@ class Group(var displayname : String,
         for (mailbox in mailbox_list) {
             result += mailbox
         }
-        return result + ";"
+        return "$result;"
     }
 }
