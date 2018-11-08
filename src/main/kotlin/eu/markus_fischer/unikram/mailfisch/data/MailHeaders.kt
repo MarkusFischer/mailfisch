@@ -48,6 +48,7 @@ class HeaderValueDate(var date : ZonedDateTime) : HeaderValue {
 
 }
 
+//TODO make sure, list contains only one Type
 class HeaderValueAddressList(var address_list : MutableList<Address>, val single_mailbox: Boolean = false) : HeaderValue {
     constructor(address_list_string : String, single_address: Boolean = false) : this(mutableListOf(), single_address) {
         if (single_address) {
