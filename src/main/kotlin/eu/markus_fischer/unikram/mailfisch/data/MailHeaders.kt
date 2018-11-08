@@ -56,10 +56,18 @@ class HeaderValueAddressList(var address_list : MutableList<Address>, val single
             address_list.add(Address(working_address_list_string))
         } else {
             var remaining_string = working_address_list_string
-            for (pos in getCharPositions(working_address_list_string, ',', true, true, true)) {
-                address_list.add(Address(remaining_string.substring(0, pos)))
-                remaining_string = remaining_string.substring(pos +1 )
+            val charPositions = getCharPositions(working_address_list_string, ',', true, true, true)
+            if (charPositions.isNotEmpty()) {
+                for (pos in charPositions) {
+                    address_list.add(Address(remaining_string.substring(0, pos)))
+                    remaining_string = remaining_string.substring(pos +1 )
+                }
+            } else {
+                if (remaining_string != "") {
+                    address_list.add(Address(remaining_string))
+                }
             }
+
         }
     }
 
