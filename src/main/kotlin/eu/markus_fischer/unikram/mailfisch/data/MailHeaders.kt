@@ -49,6 +49,18 @@ class HeaderValueDate(var date : ZonedDateTime) : HeaderValue {
 }
 
 class HeaderValueMailboxList(var mailbox_list : MutableList<Mailbox>, val single_mailbox : Boolean = false) : HeaderValue {
+    constructor(mailbox_list_string : String, single_mailbox : Boolean = false) : this(mutableListOf()) {
+        if (single_mailbox) {
+            mailbox_list.add(Mailbox(mailbox_list_string))
+        } else {
+            var remaining_string = mailbox_list_string
+            for (pos in getCharPositions(mailbox_list_string, ',', true, true, true)) {
+                mailbox_list.add(Mailbox(remaining_string.substring(0, pos)))
+                remaining_string = remaining_string.substring(pos +1 )
+            }
+        }
+    }
+
     override fun toString() : String {
         if (mailbox_list.size >= 1) {
             var result = "${mailbox_list[0]}"
