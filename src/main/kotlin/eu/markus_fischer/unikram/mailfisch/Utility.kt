@@ -58,3 +58,53 @@ fun removeRFC5322Comments(string_with_comments : String) : String {
     }
     return result
 }
+
+fun isCharInsideString(raw_string : String,
+                       character : Char,
+                       ignoreQuotes : Boolean = false,
+                       ignoreSquareBrackets : Boolean = false,
+                       ignoreAngleBrackets : Boolean = false,
+                       ignoreRFCComments : Boolean = true) : Boolean {
+    val working_string = if (ignoreRFCComments) removeRFC5322Comments(raw_string) else raw_string
+    var insideQuote = false
+    var insideSquareBrackets = false
+    var insideAngleBrackets = false
+    var escapeSequence = false
+    for (char in working_string) {
+        when (char) {
+            '<', '>' -> {
+                if (!escapeSequence) {
+                    insideAngleBrackets = !insideAngleBrackets
+                }
+                escapeSequence = false
+            }
+            '[', ']' -> {
+                if (!escapeSequence) {
+                    insideSquareBrackets = !insideSquareBrackets
+                }
+                escapeSequence = false
+            }
+            '"' -> {
+                if (!escapeSequence) {
+                    insideQuote = !insideQuote
+                }
+                escapeSequence = false
+            }
+            character -> {
+                if (!escapeSequence) {
+                    if (!(insideQuote || insideSquareBrackets || insideAngleBrackets)) {
+                        return true
+                    }
+                }
+                escapeSequence = false
+            }
+            '\\' -> {
+                escapeSequence = !escapeSequence
+            }
+            else -> {
+                escapeSequence = false
+            }
+        }
+    }
+    return false
+}
