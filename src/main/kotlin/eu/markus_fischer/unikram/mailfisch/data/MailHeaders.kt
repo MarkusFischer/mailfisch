@@ -51,11 +51,12 @@ class HeaderValueDate(var date : ZonedDateTime) : HeaderValue {
 //TODO make sure, list contains only one Type
 class HeaderValueAddressList(var address_list : MutableList<Address>, val single_mailbox: Boolean = false) : HeaderValue {
     constructor(address_list_string : String, single_address: Boolean = false) : this(mutableListOf(), single_address) {
+        var working_address_list_string = removeRFC5322Comments(address_list_string)
         if (single_address) {
-            address_list.add(Address(address_list_string))
+            address_list.add(Address(working_address_list_string))
         } else {
-            var remaining_string = address_list_string
-            for (pos in getCharPositions(address_list_string, ',', true, true, true)) {
+            var remaining_string = working_address_list_string
+            for (pos in getCharPositions(working_address_list_string, ',', true, true, true)) {
                 address_list.add(Address(remaining_string.substring(0, pos)))
                 remaining_string = remaining_string.substring(pos +1 )
             }
