@@ -73,19 +73,19 @@ fun isCharInsideString(raw_string : String,
     for (char in working_string) {
         when (char) {
             '<', '>' -> {
-                if (!escapeSequence) {
+                if (!escapeSequence && ignoreAngleBrackets) {
                     insideAngleBrackets = !insideAngleBrackets
                 }
                 escapeSequence = false
             }
             '[', ']' -> {
-                if (!escapeSequence) {
+                if (!escapeSequence && ignoreSquareBrackets) {
                     insideSquareBrackets = !insideSquareBrackets
                 }
                 escapeSequence = false
             }
             '"' -> {
-                if (!escapeSequence) {
+                if (!escapeSequence && ignoreQuotes) {
                     insideQuote = !insideQuote
                 }
                 escapeSequence = false
