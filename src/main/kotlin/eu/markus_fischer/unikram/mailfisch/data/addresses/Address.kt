@@ -9,13 +9,13 @@ class Address {
     var group : Group = Group("", mutableListOf())
         private set
 
-    //address_type = true -> type as described in rfc: mailbox
-    private enum class Type {
+    enum class Type {
         none,
         mailbox,
         group
     }
-    private var address_type : Type = Type.none
+    var address_type : Type = Type.none
+        private set
 
     constructor(mb : Mailbox) {
         mailbox = mb

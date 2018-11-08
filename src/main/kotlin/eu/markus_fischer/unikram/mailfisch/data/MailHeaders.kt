@@ -48,39 +48,9 @@ class HeaderValueDate(var date : ZonedDateTime) : HeaderValue {
 
 }
 
-class HeaderValueMailboxList(var mailbox_list : MutableList<Mailbox>, val single_mailbox : Boolean = false) : HeaderValue {
-    constructor(mailbox_list_string : String, single_mailbox : Boolean = false) : this(mutableListOf()) {
-        if (single_mailbox) {
-            mailbox_list.add(Mailbox(mailbox_list_string))
-        } else {
-            var remaining_string = mailbox_list_string
-            for (pos in getCharPositions(mailbox_list_string, ',', true, true, true)) {
-                mailbox_list.add(Mailbox(remaining_string.substring(0, pos)))
-                remaining_string = remaining_string.substring(pos +1 )
-            }
-        }
-    }
-
-    override fun toString() : String {
-        if (mailbox_list.size >= 1) {
-            var result = "${mailbox_list[0]}"
-            if (!single_mailbox) {
-                for (i in 1..mailbox_list.size - 1) {
-                    result += ",${mailbox_list[i]}"
-                }
-            }
-            return result
-        } else {
-            return "" //TODO throw exception?
-        }
-    }
-
-    override fun getFoldRepresentation(header_name_offset: Int): String = toString()
-}
-
 class HeaderValueAddressList(var address_list : MutableList<Address>, val single_mailbox: Boolean = false) : HeaderValue {
-    constructor(address_list_string : String, single_mailbox: Boolean = false) : this(mutableListOf(), single_mailbox) {
-        if (single_mailbox) {
+    constructor(address_list_string : String, single_address: Boolean = false) : this(mutableListOf(), single_address) {
+        if (single_address) {
             address_list.add(Address(address_list_string))
         } else {
             var remaining_string = address_list_string

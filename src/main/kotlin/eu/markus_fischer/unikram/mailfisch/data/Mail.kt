@@ -28,10 +28,9 @@ open class Mail (private var headers : MutableMap<String, Header> = mutableMapOf
 
     fun addHeader(name : String, value : String) {
         if (isPureASCII(name) && isPureASCII(value)) {
-            var headerValue : HeaderValue
-            when(name) {
-                "Date", "Resent-Date" -> headerValue = HeaderValueDate(value)
-                else -> headerValue = HeaderValueString(value)
+            var headerValue : HeaderValue = when(name) {
+                "Date", "Resent-Date" -> HeaderValueDate(value)
+                else -> HeaderValueString(value)
             }
             headers.put(name, Header(name, headerValue))
         } else {
