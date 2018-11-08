@@ -59,19 +59,20 @@ fun removeRFC5322Comments(string_with_comments : String) : String {
     return result
 }
 
-fun isCharInsideString(raw_string : String,
+fun getCharPositions(raw_string : String,
                        character : Char,
                        ignoreQuotes : Boolean = false,
                        ignoreSquareBrackets : Boolean = false,
                        ignoreAngleBrackets : Boolean = false,
-                       ignoreRFCComments : Boolean = true) : Boolean {
-    val working_string = if (ignoreRFCComments) removeRFC5322Comments(raw_string) else raw_string
+                       ignoreRFCComments : Boolean = true) : List<Int> {
     var insideQuote = false
     var insideSquareBrackets = false
     var insideAngleBrackets = false
+    var insideRoundBrackets = false
     var escapeSequence = false
-    for (char in working_string) {
-        when (char) {
+    var positionList : MutableList<Int> = mutableListOf()
+    for (i in 1..raw_string.length - 1) {
+        when (raw_string[i]) {
             '<', '>' -> {
                 if (!escapeSequence && ignoreAngleBrackets) {
                     insideAngleBrackets = !insideAngleBrackets
@@ -84,6 +85,12 @@ fun isCharInsideString(raw_string : String,
                 }
                 escapeSequence = false
             }
+            '(', ')' -> {
+                if (!escapeSequence && ignoreRFCComments) {
+                    insideRoundBrackets = !insideRoundBrackets
+                }
+                escapeSequence = false
+            }
             '"' -> {
                 if (!escapeSequence && ignoreQuotes) {
                     insideQuote = !insideQuote
@@ -92,8 +99,8 @@ fun isCharInsideString(raw_string : String,
             }
             character -> {
                 if (!escapeSequence) {
-                    if (!(insideQuote || insideSquareBrackets || insideAngleBrackets)) {
-                        return true
+                    if (!(insideQuote || insideSquareBrackets || insideAngleBrackets || insideRoundBrackets)) {
+                        positionList.add(i)
                     }
                 }
                 escapeSequence = false
@@ -106,5 +113,5 @@ fun isCharInsideString(raw_string : String,
             }
         }
     }
-    return false
+    return positionList.toList()
 }

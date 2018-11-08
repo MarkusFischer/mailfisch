@@ -1,6 +1,6 @@
 package eu.markus_fischer.unikram.mailfisch.data.addresses
 
-import eu.markus_fischer.unikram.mailfisch.isCharInsideString
+import eu.markus_fischer.unikram.mailfisch.getCharPositions
 
 class Address {
     var mailbox : Mailbox = Mailbox("", "", "")
@@ -30,7 +30,7 @@ class Address {
     constructor(address : String) {
         var inside_quote = false
         var escaped_sequence = false
-        if (isCharInsideString(address, ';', true, true)) {
+        if (getCharPositions(address, ';', true, true).isNotEmpty()) {
             group = Group(address)
             address_type = Type.group
         } else {
