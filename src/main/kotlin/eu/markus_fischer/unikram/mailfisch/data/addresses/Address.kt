@@ -1,5 +1,7 @@
 package eu.markus_fischer.unikram.mailfisch.data.addresses
 
+import eu.markus_fischer.unikram.mailfisch.isCharInsideString
+
 class Address {
     var mailbox : Mailbox = Mailbox("", "", "")
         private set
@@ -23,6 +25,18 @@ class Address {
     constructor(grp : Group) {
         group = grp
         address_type = Type.group
+    }
+
+    constructor(address : String) {
+        var inside_quote = false
+        var escaped_sequence = false
+        if (isCharInsideString(address, ';', true, true)) {
+            group = Group(address)
+            address_type = Type.group
+        } else {
+            mailbox = Mailbox(address)
+            address_type = Type.mailbox
+        }
     }
 
     override fun toString(): String {
