@@ -20,7 +20,7 @@ class Mailbox (var display_name : String,
         var split_pos_local_global = -1
         var name_adr = false
         var angel_adr_begin_pos = -1
-        for (i in 1..working_string.length - 1) {
+        for (i in 0..working_string.length - 1) {
             when (working_string[i]) {
                 '\"' -> {
                     if (!escape_sequence_beginning)
