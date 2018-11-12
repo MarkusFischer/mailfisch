@@ -30,7 +30,8 @@ open class Mail (private var headers : MutableMap<String, Header> = mutableMapOf
         if (isPureASCII(name) && isPureASCII(value)) {
             var headerValue : HeaderValue = when(name) {
                 "Date", "Resent-Date" -> HeaderValueDate(value)
-                "From", "Resent-From", "Reply-To", "To", "Cc", "Bcc" -> HeaderValueAddressList(value)
+                "From", "Resent-From", "Reply-To", "To", "Resent-To", "Resent-Cc", "Cc",
+                "Resent-Bcc", "Bcc" -> HeaderValueAddressList(value)
                 "Sender", "Resent-Sender" -> HeaderValueAddressList(value, single_address = true)
                 else -> HeaderValueString(value)
             }
