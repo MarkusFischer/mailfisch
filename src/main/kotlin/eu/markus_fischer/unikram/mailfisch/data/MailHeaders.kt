@@ -8,7 +8,7 @@ import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
 class Header(var name : String, var value : HeaderValue) {
-    fun getFoldedHeader() : String = "$name: ${value.getFoldRepresentation(name.length)}"
+    fun getFoldedHeader() : String = "$name: ${value.getFoldRepresentation(name.length + 2)}"
     override fun toString(): String = "$name: $value"
 }
 
@@ -84,5 +84,6 @@ class HeaderValueAddressList(var address_list : MutableList<Address>, val single
             return "" //TODO throw exception?
         }
     }
-    override fun getFoldRepresentation(header_name_offset: Int): String = toString()
+    //TODO own implementation
+    override fun getFoldRepresentation(header_name_offset: Int): String = HeaderValueString(toString()).getFoldRepresentation(header_name_offset)
 }

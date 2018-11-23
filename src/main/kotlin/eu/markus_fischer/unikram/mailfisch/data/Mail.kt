@@ -51,4 +51,14 @@ open class Mail (private var headers : MutableMap<String, Header> = mutableMapOf
         return "Header: ${unfold(raw_header)}" +
                 "Content: $raw_content"
     }
+
+    fun prepareToSend() : String {
+        var result = ""
+        for ((name, header) in headers) {
+            result += "${header.getFoldedHeader()}\n"
+        }
+        result += "\n"
+        result += raw_content //TODO fold content
+        return result.replace("\n", "\r\n")
+    }
 }
