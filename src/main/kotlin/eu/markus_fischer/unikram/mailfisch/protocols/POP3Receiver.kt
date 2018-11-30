@@ -51,28 +51,34 @@ class POP3Receiver(var hostname: String,
         output_stream = PrintStream(socket?.getOutputStream())
         val pop3_status_indicator = input_stream?.readLine()?.substring(0, 4)
         if (pop3_status_indicator == "+OK ") {
+            connected = true
             return true
         }
+        connected = false
         return false
     }
 
     private fun sendCommand(command : String, arg1 : String = "", arg2 : String = "", multiple_return_values : Boolean = false) : Pair<Boolean, List<String>>{
-        output_stream?.println(if (arg2 == "") "$command $arg1" else "$command $arg1 $arg2")
-        val pop3_status : MutableList<String> = mutableListOf()
-        val status = input_stream?.readLine().toString()
-        pop3_status.add(status)
-        var success = false
-        if (status.substring(0, 3) == "+OK") {
-            success = true
-            if (multiple_return_values) {
-                var last = ""
-                while (last != ".") {
-                    last = input_stream?.readLine().toString()
-                    pop3_status.add(last)
+        if (connected) {
+            output_stream?.println(if (arg2 == "") "$command $arg1" else "$command $arg1 $arg2")
+            val pop3_status : MutableList<String> = mutableListOf()
+            val status = input_stream?.readLine().toString()
+            pop3_status.add(status)
+            var success = false
+            if (status.substring(0, 3) == "+OK") {
+                success = true
+                if (multiple_return_values) {
+                    var last = ""
+                    while (last != ".") {
+                        last = input_stream?.readLine().toString()
+                        pop3_status.add(last)
+                    }
                 }
             }
+            return Pair(success, pop3_status.toList())
+        } else {
+            return Pair(false, listOf())
         }
-        return Pair(success, pop3_status.toList())
     }
 
     fun useSTARTTLS() : Boolean {
