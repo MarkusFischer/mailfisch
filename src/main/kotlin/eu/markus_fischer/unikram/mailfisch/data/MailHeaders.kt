@@ -12,6 +12,8 @@ class Header(var name : String, var value : HeaderValue) {
     override fun toString(): String = "$name: $value"
 }
 
+//TODO remove redundant code
+
 interface HeaderValue {
     fun getFoldRepresentation(header_name_offset : Int = 0) : String
 }
@@ -51,7 +53,7 @@ class HeaderValueDate(var date : ZonedDateTime) : HeaderValue {
 //TODO make sure, list contains only one Type
 class HeaderValueAddressList(var address_list : MutableList<Address>, val single_mailbox: Boolean = false) : HeaderValue {
     constructor(address_list_string : String, single_address: Boolean = false) : this(mutableListOf(), single_address) {
-        var working_address_list_string = removeRFC5322Comments(address_list_string)
+        val working_address_list_string = removeRFC5322Comments(address_list_string)
         if (single_address) {
             address_list.add(Address(working_address_list_string))
         } else {
@@ -86,4 +88,44 @@ class HeaderValueAddressList(var address_list : MutableList<Address>, val single
     }
     //TODO own implementation
     override fun getFoldRepresentation(header_name_offset: Int): String = HeaderValueString(toString()).getFoldRepresentation(header_name_offset)
+}
+
+class MessageIdList(var msgid_list : MutableList<MessageID>, val single_id : Boolean = false) : HeaderValue {
+
+    constructor(id_list_string : String, single_id: Boolean = false) : this(mutableListOf(), single_id) {
+        val working_address_list_string = removeRFC5322Comments(id_list_string)
+        if (single_id) {
+            msgid_list.add(MessageID(working_address_list_string))
+        } else {
+            var remaining_string = working_address_list_string
+            val charPositions = getCharPositions(working_address_list_string, ',', true, true, true)
+            if (charPositions.isNotEmpty()) {
+                for (pos in charPositions) {
+                    msgid_list.add(MessageID(remaining_string.substring(0, pos)))
+                    remaining_string = remaining_string.substring(pos +1 )
+                }
+            } else {
+                if (remaining_string != "") {
+                    msgid_list.add(MessageID(remaining_string))
+                }
+            }
+
+        }
+    }
+
+    override fun toString(): String {
+        if (msgid_list.size >= 1) {
+            var result = "${msgid_list[0]}"
+            if (!single_id) {
+                for (i in 1..msgid_list.size - 1) {
+                    result += ",${msgid_list[i]}"
+                }
+            }
+            return result
+        } else {
+            return "" //TODO throw exception?
+        }
+    }
+
+    override fun getFoldRepresentation(header_name_offset: Int): String  = HeaderValueString(toString()).getFoldRepresentation(header_name_offset)
 }
