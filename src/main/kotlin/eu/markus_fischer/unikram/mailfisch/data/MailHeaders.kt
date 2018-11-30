@@ -90,7 +90,7 @@ class HeaderValueAddressList(var address_list : MutableList<Address>, val single
     override fun getFoldRepresentation(header_name_offset: Int): String = HeaderValueString(toString()).getFoldRepresentation(header_name_offset)
 }
 
-class MessageIdList(var msgid_list : MutableList<MessageID>, val single_id : Boolean = false) : HeaderValue {
+class HeaderValueMessageIdList(var msgid_list : MutableList<MessageID>, val single_id : Boolean = false) : HeaderValue {
 
     constructor(id_list_string : String, single_id: Boolean = false) : this(mutableListOf(), single_id) {
         val working_address_list_string = removeRFC5322Comments(id_list_string)

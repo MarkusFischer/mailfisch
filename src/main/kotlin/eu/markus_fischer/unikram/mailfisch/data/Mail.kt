@@ -28,14 +28,16 @@ open class Mail (private var headers : MutableMap<String, Header> = mutableMapOf
 
     fun addHeader(name : String, value : String) {
         if (isPureASCII(name) && isPureASCII(value)) {
-            var headerValue : HeaderValue = when(name) {
-                "Date", "Resent-Date" -> HeaderValueDate(value)
-                "From", "Resent-From", "Reply-To", "To", "Resent-To", "Resent-Cc", "Cc",
-                "Resent-Bcc", "Bcc" -> HeaderValueAddressList(value)
-                "Sender", "Resent-Sender" -> HeaderValueAddressList(value, single_address = true)
+            var headerValue : HeaderValue = when(name.toLowerCase()) {
+                "date", "resent-date" -> HeaderValueDate(value)
+                "from", "resent-from", "reply-to", "to", "resent-to", "resent-cc", "cc",
+                "resent-bcc", "bcc" -> HeaderValueAddressList(value)
+                "sender", "resent-sender" -> HeaderValueAddressList(value, single_address = true)
+                "message-id" -> HeaderValueMessageIdList(value, single_id = true)
+                "in-reply-to", "references" -> HeaderValueMessageIdList(value)
                 else -> HeaderValueString(value)
             }
-            headers.put(name, Header(name, headerValue))
+            headers.put(name.toLowerCase(), Header(name.toLowerCase(), headerValue))
         } else {
             throw IllegalArgumentException("The header was not encoded in US-ASCII!")
         }
@@ -43,7 +45,7 @@ open class Mail (private var headers : MutableMap<String, Header> = mutableMapOf
 
     fun getAllHeaderKeys() = headers.keys.toString()
 
-    fun getHeader(name : String) : Header = headers.get(name) ?: Header(name, HeaderValueString(""))
+    fun getHeader(name : String) : Header = headers.get(name.toLowerCase()) ?: Header(name.toLowerCase(), HeaderValueString(""))
 
     private fun unfold(entry : String) : String = entry.replace(Regex("((([\t ]*\n)?[\t ]+)|([\t ]+(\n[\t ]+)))"), " ")
 
