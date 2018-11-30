@@ -122,7 +122,15 @@ class SMTPSender(var hostname: String,
     }
 
     override fun quit(): Boolean {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        val (status, lines) = sendCommand("QUIT")
+        if (status != 221) {
+            throw RuntimeException("Fatal! Other SMTP Status code after QUIT!")
+            return false
+        } else {
+            socket?.close()
+            connected = false
+            return true
+        }
     }
 
     override fun getSupportedFeatures(): List<String> = supported_features.toList()
