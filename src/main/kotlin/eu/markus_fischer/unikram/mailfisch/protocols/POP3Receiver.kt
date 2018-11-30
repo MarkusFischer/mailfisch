@@ -1,10 +1,21 @@
 package eu.markus_fischer.unikram.mailfisch.protocols
 
 import eu.markus_fischer.unikram.mailfisch.data.Mail
+import eu.markus_fischer.unikram.mailfisch.data.ReceiveProtocol
 import eu.markus_fischer.unikram.mailfisch.network.Session
 import java.io.*
+import java.lang.Exception
+import java.net.Socket
+import javax.net.ssl.SSLSocket
+import javax.net.ssl.SSLSocketFactory
 
-class POP3Receiver (val session: Session) : IReceiver {
+class POP3Receiver(var hostname: String,
+                   var port: Int = ReceiveProtocol.POP3S.port,
+                   var use_ssl: Boolean = true) : IReceiver {
+
+    private var socket : Socket? = null
+    private var use_tls : Boolean = false
+    private var connected : Boolean = false
 
     private var input_stream : BufferedReader? = null
     private var output_stream : PrintStream? = null
@@ -17,9 +28,33 @@ class POP3Receiver (val session: Session) : IReceiver {
         ERR
     }
 
-    override fun init() : Boolean {
-        input_stream = BufferedReader(InputStreamReader(session.socket?.getInputStream()))
-        output_stream = PrintStream(session.socket?.getOutputStream())
+    override fun connect() : Boolean {
+        if (connected) {
+            quit()
+        } else {
+            if (use_ssl) {
+                try {
+                    socket = SSLSocketFactory.getDefault().createSocket(hostname, port)
+                    (socket as SSLSocket).startHandshake()
+                    connected = true
+                    use_tls = true
+                } catch (e : Exception) {
+                    e.printStackTrace()
+                    connected = false
+                }
+            } else {
+                try {
+                    socket = Socket(hostname, port)
+                    connected = true
+                    use_tls = false
+                } catch (e : Exception) {
+                    e.printStackTrace()
+                    connected = false
+                }
+            }
+        }
+        input_stream = BufferedReader(InputStreamReader(socket?.getInputStream()))
+        output_stream = PrintStream(socket?.getOutputStream())
         val pop3_status_indicator = input_stream?.readLine()?.substring(0, 4)
         if (pop3_status_indicator == "+OK ") {
             return true
@@ -81,10 +116,10 @@ class POP3Receiver (val session: Session) : IReceiver {
     }
 
     override fun quit() : Boolean {
-        if (quit_performed || sendCommand("QUIT").first) {
+        if (connected && sendCommand("QUIT").first) {
             mail_marked_for_deletion = false
+            connected = false
             //TODO work around to fix hanging quit when quit was called twice
-            quit_performed = true
             return true
         } else {
             return false

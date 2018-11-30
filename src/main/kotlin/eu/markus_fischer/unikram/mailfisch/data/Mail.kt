@@ -17,7 +17,7 @@ open class Mail (private var headers : MutableMap<String, Header> = mutableMapOf
         }
         raw_header = splitted_mail[0]
         raw_content = splitted_mail[1]
-        if (!headers.containsKey("Date") || !headers.containsKey("From")) {
+        if (!headers.containsKey("date") || !headers.containsKey("from")) {
             throw IllegalArgumentException("received no e-mail that is compilant to RFC5322")
         }
 

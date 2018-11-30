@@ -51,8 +51,10 @@ fun main(args : Array<String>) {
     println("Connected? $success")
     if (success) {
         println("Init POP3Receiver...")
-        val receiver : IReceiver = POP3Receiver(session = income_session)
-        if (receiver.init()) {
+        val receiver : IReceiver = POP3Receiver(test_account.remote_income_server,
+                                                test_account.remote_income_port,
+                                                use_ssl = use_ssl == "y")
+        if (receiver.connect()) {
             println("Init was successfull!")
             println("Try to authenticate on the remote server...")
             if (receiver.authenticate(test_account.user, test_account.password)) {
@@ -99,8 +101,6 @@ fun main(args : Array<String>) {
             }
             println("Closing receiver...")
             receiver.quit()
-            println("Closing session...")
-            income_session.close_connection()
         }
     }
 }
