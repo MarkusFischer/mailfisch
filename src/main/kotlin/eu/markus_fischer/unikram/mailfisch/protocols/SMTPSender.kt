@@ -7,6 +7,8 @@ import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.io.PrintStream
 import java.lang.Exception
+import java.lang.RuntimeException
+import java.net.InetAddress
 import java.net.Socket
 import javax.net.ssl.SSLSocket
 import javax.net.ssl.SSLSocketFactory
@@ -21,6 +23,9 @@ class SMTPSender(var hostname: String,
 
     private var input_stream : BufferedReader? = null
     private var output_stream : PrintStream? = null
+    var supported_features : MutableList<String> = mutableListOf()
+        private set
+    private var esmtp = false
 
     override fun connect() : Boolean {
         if (connected) {
@@ -73,6 +78,33 @@ class SMTPSender(var hostname: String,
         return Pair(-1, listOf())
     }
 
+    override fun init() : Boolean {
+        var (status, lines) = sendCommand("EHLO", InetAddress.getLocalHost().getHostName())
+        if (status == 502) {
+            esmtp = false
+            val (s, l) = sendCommand("HELO", InetAddress.getLocalHost().getHostName())
+            status = s
+            lines = l
+        }
+        when(status) {
+            250 -> {
+                    if (lines.size > 1) {
+                        for (line in lines.subList(1, lines.lastIndex)) {
+                            val feature = line.substring(5)
+                            supported_features.add(feature)
+                        }
+                    }
+                return true
+            }
+            504, 550 -> {
+                return false
+            }
+            else -> {
+                throw RuntimeException("Unexpected return code!")
+            }
+        }
+    }
+
     override fun isAlive(): Boolean {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
@@ -93,7 +125,5 @@ class SMTPSender(var hostname: String,
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun getSupportedFeatures(): List<String> {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun getSupportedFeatures(): List<String> = supported_features.toList()
 }

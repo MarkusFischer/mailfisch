@@ -5,6 +5,7 @@ import eu.markus_fischer.unikram.mailfisch.data.addresses.Address
 
 interface ISender {
     fun connect() : Boolean
+    fun init() : Boolean
     fun isAlive() : Boolean
     fun authenticate(user: String, password: String) : Boolean
     fun sendMail(mail : Mail) : Boolean
