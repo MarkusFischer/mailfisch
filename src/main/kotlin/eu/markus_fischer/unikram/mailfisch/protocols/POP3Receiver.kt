@@ -21,12 +21,6 @@ class POP3Receiver(var hostname: String,
     private var output_stream : PrintStream? = null
     private var mail_marked_for_deletion = false
 
-    private var quit_performed = false
-
-    private enum class Status{
-        OK,
-        ERR
-    }
 
     override fun connect() : Boolean {
         if (connected) {
@@ -79,6 +73,26 @@ class POP3Receiver(var hostname: String,
             }
         }
         return Pair(success, pop3_status.toList())
+    }
+
+    fun useSTARTTLS() : Boolean {
+        if (sendCommand("STARTTLS").first) {
+            try {
+                socket = (SSLSocketFactory.getDefault() as SSLSocketFactory).createSocket(socket, socket?.getInetAddress()?.getHostAddress(),
+                        socket?.getPort() ?: 0, true)
+                (socket as SSLSocket).startHandshake()
+                BufferedReader(InputStreamReader(socket?.getInputStream()))
+                output_stream = PrintStream(socket?.getOutputStream())
+                connected = true
+                use_tls = true
+                return true
+            } catch (e : Exception) {
+                e.printStackTrace()
+                connected = false
+            }
+        }
+
+        return false
     }
 
     override fun isAlive(): Boolean = sendCommand("NOOP").first
