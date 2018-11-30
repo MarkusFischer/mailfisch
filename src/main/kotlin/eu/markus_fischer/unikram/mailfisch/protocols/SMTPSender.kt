@@ -57,7 +57,21 @@ class SMTPSender(var hostname: String,
         }
     }
 
-    private fun sendCommand(command : String, arg1 : String = "") : Pair<Int, List<String>> = Pair(42, listOf())
+    private fun sendCommand(command : String, arg1 : String = "") : Pair<Int, List<String>>{
+        if (connected) {
+            output_stream?.println(if (arg1 == "") command else "$command $arg1")
+            val command_output : MutableList<String> = mutableListOf()
+            var smtp_return = input_stream?.readLine().toString()
+            val status = smtp_return.substring(0, 4).toInt()
+            command_output.add(smtp_return)
+            while (smtp_return[4] == '-') {
+                smtp_return = input_stream?.readLine().toString()
+                command_output.add(smtp_return)
+            }
+            return Pair(status, command_output.toList())
+        }
+        return Pair(-1, listOf())
+    }
 
     override fun isAlive(): Boolean {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.

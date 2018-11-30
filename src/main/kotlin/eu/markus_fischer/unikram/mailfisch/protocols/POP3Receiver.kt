@@ -51,7 +51,6 @@ class POP3Receiver(var hostname: String,
         output_stream = PrintStream(socket?.getOutputStream())
         val pop3_status_indicator = input_stream?.readLine()?.substring(0, 4)
         if (pop3_status_indicator == "+OK ") {
-            connected = true
             return true
         }
         connected = false

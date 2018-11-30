@@ -1,6 +1,5 @@
 package eu.markus_fischer.unikram.mailfisch.data
 
-import eu.markus_fischer.unikram.mailfisch.removeRFC5322Comments
 import java.nio.charset.Charset
 
 open class Mail (private var headers : MutableMap<String, Header> = mutableMapOf(),
