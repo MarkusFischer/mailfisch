@@ -82,7 +82,7 @@ class POP3Receiver(var hostname: String,
     }
 
     fun useSTARTTLS() : Boolean {
-        if (sendCommand("STARTTLS").first) {
+        if (sendCommand("STLS").first) {
             try {
                 socket = (SSLSocketFactory.getDefault() as SSLSocketFactory).createSocket(socket, socket?.getInetAddress()?.getHostAddress(),
                         socket?.getPort() ?: 0, true)

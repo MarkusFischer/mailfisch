@@ -55,6 +55,8 @@ fun main(args : Array<String>) {
                                                 test_account.remote_income_port,
                                                 use_ssl = use_ssl == "y")
         if (receiver.connect()) {
+            println("STARTTLS...")
+            (receiver as POP3Receiver).useSTARTTLS()
             println("Init was successfull!")
             println("Try to authenticate on the remote server...")
             if (receiver.authenticate(test_account.user, test_account.password)) {
