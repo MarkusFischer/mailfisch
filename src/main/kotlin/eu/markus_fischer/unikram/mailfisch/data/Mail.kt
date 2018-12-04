@@ -59,6 +59,12 @@ open class Mail (private var headers : MutableMap<String, Header> = mutableMapOf
             result += "${header.getFoldedHeader()}\n"
         }
         result += "\n"
+        for (line in raw_content.split('\n')) {
+            if (line[0] == '.'){
+                result += '.'
+            }
+            result += line
+        }
         result += raw_content //TODO fold content
         return result.replace("\n", "\r\n")
     }
