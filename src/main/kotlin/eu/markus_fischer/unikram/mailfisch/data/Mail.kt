@@ -56,14 +56,14 @@ open class Mail (private var headers : MutableMap<String, Header> = mutableMapOf
     fun prepareToSend() : String {
         var result = ""
         for ((name, header) in headers) {
-            result += "${header.getFoldedHeader()}\n"
+            result += "${header.getFoldedHeader()}"
         }
-        result += "\n"
+        result += "\n\n"
         for (line in raw_content.split('\n')) {
             if (line[0] == '.'){
                 result += '.'
             }
-            result += line
+            result += "$line\n"
         }
         result += raw_content //TODO fold content
         return result.replace("\n", "\r\n")

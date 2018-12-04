@@ -1,12 +1,18 @@
 package eu.markus_fischer.unikram.mailfisch
 
 import eu.markus_fischer.unikram.mailfisch.data.Account
+import eu.markus_fischer.unikram.mailfisch.data.Mail
 import eu.markus_fischer.unikram.mailfisch.data.ReceiveProtocol
+import eu.markus_fischer.unikram.mailfisch.data.SendProtocol
 import eu.markus_fischer.unikram.mailfisch.data.addresses.Mailbox
 import eu.markus_fischer.unikram.mailfisch.network.SSLSession
 import eu.markus_fischer.unikram.mailfisch.network.Session
 import eu.markus_fischer.unikram.mailfisch.protocols.IReceiver
+import eu.markus_fischer.unikram.mailfisch.protocols.ISender
 import eu.markus_fischer.unikram.mailfisch.protocols.POP3Receiver
+import eu.markus_fischer.unikram.mailfisch.protocols.SMTPSender
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 
 /*
 fun main(args: Array<String>) {
@@ -23,7 +29,7 @@ fun main(args: Array<String>) {
 }
 */
 fun main(args : Array<String>) {
-    println("mailfisch v1")
+    /*println("mailfisch v1")
     println("simple pop3 client")
     print("Please enter the remote hostname: ")
     val hostname = readLine()!!
@@ -46,63 +52,50 @@ fun main(args : Array<String>) {
                                 SSLSession(test_account.remote_income_server, test_account.remote_income_port) else
                                 Session(test_account.remote_income_server, test_account.remote_income_port)
 
-    println("Connecting... ")
-    val success = income_session.establish_connection()
-    println("Connected? $success")
-    if (success) {
-        println("Init POP3Receiver...")
-        val receiver : IReceiver = POP3Receiver(test_account.remote_income_server,
-                                                test_account.remote_income_port,
-                                                use_ssl = use_ssl == "y")
-        if (receiver.connect()) {
-            println("STARTTLS...")
-            (receiver as POP3Receiver).useSTARTTLS()
-            println("Init was successfull!")
-            println("Try to authenticate on the remote server...")
-            if (receiver.authenticate(test_account.user, test_account.password)) {
-                println("Successfully authenticated!")
-                var active = true
-                while (active) {
-                    println("Which action do you want to perform?")
-                    print("Enter (l)ist, (r)etrive or (q)uit: ")
-                    val action = readLine()!!
-                    when (action) {
-                        "l" -> {
-                            val (suc, count) = receiver.getMailCount()
-                            if (suc) {
-                                println("There are $count Mails in your inbox:")
-                                for (i in 1..count) {
-                                    println("$i) Subject: ${receiver.getMail(i).second.getHeader("Subject").value}")
-                                }
-                            }
-                        }
-                        "r" -> {
-                            print("Which mail do you want to read? ")
-                            val mail_id = readLine()!!.toInt()
-                            val (suc, mail) = receiver.getMail(mail_id)
-                            if (suc) {
-                                println("From: ${mail.getHeader("From").value}")
-                                println("To: ${mail.getHeader("To").value}")
-                                println("Date: ${mail.getHeader("Date").value}")
-                                println("Subject: ${mail.getHeader("Subject").value}\n")
-                                println("Content: ${mail.raw_content}")
-                            } else {
-                                println("Could not receive mail $mail_id. Maybe this mail doesn't exist?")
-                            }
-                        }
-                        "q" -> {
-                            println("Quiting...")
-                            receiver.quit()
-                            active = false
-                        }
-                    }
-                }
-            } else {
-                println("Something went wrong during authentication!")
-                println("Maybe you entered the wrong user/password combination?")
-            }
-            println("Closing receiver...")
-            receiver.quit()
+    println("Connecting... ")*/
+    println("mailfisch v2")
+    /*val test_account = Account(remote_income_server = "pop.mail.de",
+                                remote_income_protocol = ReceiveProtocol.POP3S,
+                                remote_income_port = 995,
+                                remote_out_server = "smtp.mail.de",
+                                remote_out_port = 587,
+                                remote_out_protocol = SendProtocol.SMTP,
+                                use_starttls_out = true,
+                                mail_adress = "mf.dev@mail.de",
+                                user = "mf.dev",
+                                password = "GanzSicheresPasswort")*/
+    val test_account = Account(remote_income_server = "pop.mail.de",
+            remote_income_protocol = ReceiveProtocol.POP3S,
+            remote_income_port = 995,
+            remote_out_server = "server.inc.li",
+            remote_out_port = 587,
+            remote_out_protocol = SendProtocol.SMTP,
+            use_starttls_out = true,
+            mail_adress = "igel@inc.li",
+            user = "igel@inc.li",
+            password = "j9rbb3gFCc")
+    val sender : ISender = SMTPSender(hostname = test_account.remote_out_server,
+                                        port = test_account.remote_out_port,
+                                        use_ssl = false)
+    println("Try to connect...")
+    val testmail : Mail = Mail()
+    testmail.raw_content="Das ist eine tolle Testmail!"
+    testmail.addHeader("from", test_account.mail_adress)
+    testmail.addHeader("to", "ich@markus-fischer.eu")
+    testmail.addHeader("subject", "Testmail")
+    testmail.addHeader("date", DateTimeFormatter.RFC_1123_DATE_TIME.format(ZonedDateTime.now()))
+    if (sender.connect()) {
+        println("Connected!")
+        println("Init...")
+        if (sender.init()) {
+            println("Init worked!")
+            println("Supported Features: ${sender.getSupportedFeatures()}")
+            println("Authenticate...")
+            sender.authenticate(test_account.user, test_account.password)
+            println("Send mail...")
+            sender.sendMail(testmail)
         }
+        println("Quit...")
+        sender.quit()
     }
 }
