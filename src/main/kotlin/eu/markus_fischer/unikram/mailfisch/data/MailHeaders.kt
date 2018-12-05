@@ -44,7 +44,9 @@ class HeaderValueDate(var date : ZonedDateTime) : HeaderValue {
 
     constructor(date_string : String) : this(ZonedDateTime.parse(removeRFC5322Comments(date_string).trim(), DateTimeFormatter.RFC_1123_DATE_TIME))
 
-    override fun toString(): String = DateTimeFormatter.RFC_1123_DATE_TIME.format(date)
+    constructor() : this(ZonedDateTime.now())
+
+    override fun toString(): String = "${DateTimeFormatter.RFC_1123_DATE_TIME.format(date)}\n"
 
     override fun getFoldRepresentation(header_name_offset: Int): String = toString()
 
