@@ -39,6 +39,16 @@ class Address {
         }
     }
 
+    fun getMailboxes() : List<Mailbox> {
+        if (address_type == Type.mailbox) {
+            return listOf(mailbox)
+        } else if (address_type == Type.group) {
+            return group.mailbox_list.toList()
+        } else {
+            return emptyList()
+        }
+    }
+
     override fun toString(): String {
         return when (address_type) {
             Type.none -> ""
