@@ -288,13 +288,16 @@ class SMTPSender(var hostname: String,
     }
 
     override fun quit() {
-        val (status, lines) = sendCommand("QUIT")
-        if (status != 221) {
-            throw RuntimeException("Fatal! Other SMTP Status code after QUIT!")
-        } else {
-            socket?.close()
-            connected = false
+        if (connected) {
+            val (status, lines) = sendCommand("QUIT")
+            if (status != 221) {
+                throw RuntimeException("Fatal! Other SMTP Status code after QUIT! More information: $lines")
+            } else {
+                socket?.close()
+                connected = false
+            }
         }
+
     }
 
     override fun getSupportedFeatures(): List<String> = supported_features.toList()

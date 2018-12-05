@@ -1,7 +1,6 @@
 package eu.markus_fischer.unikram.mailfisch.data
 
 import eu.markus_fischer.unikram.mailfisch.data.addresses.Address
-import eu.markus_fischer.unikram.mailfisch.data.addresses.Mailbox
 import eu.markus_fischer.unikram.mailfisch.getCharPositions
 import eu.markus_fischer.unikram.mailfisch.removeRFC5322Comments
 import java.time.ZonedDateTime
@@ -59,16 +58,18 @@ class HeaderValueAddressList(var address_list : MutableList<Address>, val single
         if (single_address) {
             address_list.add(Address(working_address_list_string))
         } else {
-            var remaining_string = working_address_list_string
             val charPositions = getCharPositions(working_address_list_string, ',', true, true, true)
             if (charPositions.isNotEmpty()) {
+                var offset = 0
                 for (pos in charPositions) {
-                    address_list.add(Address(remaining_string.substring(0, pos)))
-                    remaining_string = remaining_string.substring(pos +1 )
+                    address_list.add(Address(working_address_list_string.substring(offset, pos).trim()))
+                    offset = pos + 1
                 }
+                //TODO to be safe: every Address like constructor should trim
+                address_list.add(Address(working_address_list_string.substring(offset).trim()))
             } else {
-                if (remaining_string != "") {
-                    address_list.add(Address(remaining_string))
+                if (working_address_list_string != "") {
+                    address_list.add(Address(working_address_list_string))
                 }
             }
 
@@ -99,16 +100,17 @@ class HeaderValueMessageIdList(var msgid_list : MutableList<MessageID>, val sing
         if (single_id) {
             msgid_list.add(MessageID(working_address_list_string))
         } else {
-            var remaining_string = working_address_list_string
             val charPositions = getCharPositions(working_address_list_string, ',', true, true, true)
             if (charPositions.isNotEmpty()) {
+                var offset = 0
                 for (pos in charPositions) {
-                    msgid_list.add(MessageID(remaining_string.substring(0, pos)))
-                    remaining_string = remaining_string.substring(pos +1 )
+                    msgid_list.add(MessageID(working_address_list_string.substring(offset, pos).trim()))
+                    offset = pos + 1
                 }
+                msgid_list.add(MessageID(working_address_list_string.substring(offset).trim()))
             } else {
-                if (remaining_string != "") {
-                    msgid_list.add(MessageID(remaining_string))
+                if (working_address_list_string != "") {
+                    msgid_list.add(MessageID(working_address_list_string))
                 }
             }
 

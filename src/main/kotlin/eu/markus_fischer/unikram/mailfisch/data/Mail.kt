@@ -95,8 +95,9 @@ open class Mail (private var headers : MutableMap<String, Header> = mutableMapOf
             }
         }
         result += "\n"
+        raw_content = raw_content.trim()
         for (line in raw_content.split('\n')) {
-            if (line[0] == '.'){
+            if (line.isNotEmpty() && line[0] == '.'){
                 result += '.'
             }
             result += "$line\n"
