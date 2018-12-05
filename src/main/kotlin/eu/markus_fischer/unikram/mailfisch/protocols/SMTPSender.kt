@@ -242,30 +242,49 @@ class SMTPSender(var hostname: String,
         if (!mail.hasHeader("message-id")) {
             mail.addHeader("message-id", HeaderValueMessageIdList(mutableListOf(MessageID(smtp_from)), true))
         }
-        println(sendCommand("MAIL", "FROM:<${smtp_from.getMailAddress()}>"))
-        for (mailbox in smtp_rcpt_to) {
-            println(sendCommand("RCPT", "TO:<${mailbox.getMailAddress()}>"))
-        }
         if (!bcc_as_single_mail) {
+            sendMail(smtp_from, smtp_rcpt_to.union(smtp_rcpt_to_bcc).toList(), mail.prepareToSend())
+        } else {
+            val prepared_mail = mail.prepareToSend()
+            sendMail(smtp_from, smtp_rcpt_to, prepared_mail)
             for (mailbox in smtp_rcpt_to_bcc) {
-                println(sendCommand("RCPT", "TO:<${mailbox.getMailAddress()}>"))
-            }
-        }
-        println(sendCommand("DATA"))
-        println(sendCommand("${mail.prepareToSend()}\r\n.\r\n"))
-        if (bcc_as_single_mail) {
-            for (mailbox in smtp_rcpt_to_bcc) {
-                println(sendCommand("MAIL", "FROM:<${smtp_from.getMailAddress()}>"))
-                println(sendCommand("RCPT", "TO:<${mailbox.getMailAddress()}>"))
-                println(sendCommand("DATA"))
-                println(sendCommand("${mail.prepareToSend()}\r\n.\r\n"))
+                sendMail(smtp_from, listOf(mailbox), prepared_mail)
             }
         }
         return true
     }
 
-    override fun sendMail(from: Address, to: Address, raw_mail: String) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun sendMail(from : Mailbox, to : List<Mailbox>, raw_mail : String) {
+        if (to.isEmpty() || raw_mail.isBlank()) {
+            throw IllegalArgumentException("Parameters shouldn't be empty")
+        }
+        var (status, lines) = sendCommand("MAIL", "FROM:<${from.getMailAddress()}>")
+        if (status == 250) {
+            for (mailbox in to) {
+                var (stat, lin) = sendCommand("RCPT", "TO:<${mailbox.getMailAddress()}>")
+                var error =when (stat) {
+                    250, 251 -> false
+                    //TODO parse other error codes
+                    /*552, 554, 451, 452, 503 -> true //storage or general related errors
+                    450, 550 -> true //command rejected for policy reasons*/
+                    else -> true
+                }
+                if (error) {
+                    throw RuntimeException(lin.toString())
+                }
+            }
+            var (stat, line) = sendCommand("DATA")
+            if (stat == 354) {
+                var (s, l) = sendCommand("$raw_mail\r\n.\r\n")
+                if (s != 250) {
+                    throw RuntimeException("Something went wrong during data transmission. Exception given from Server: ${l.toString()}")
+                }
+            } else {
+                throw RuntimeException("Something went wrong during data transmission. Exception given from Server: ${lines.toString()}")
+            }
+        } else {
+            throw RuntimeException(lines.toString())
+        }
     }
 
     override fun quit() {
