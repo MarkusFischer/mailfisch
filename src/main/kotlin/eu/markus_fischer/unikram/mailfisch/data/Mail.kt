@@ -2,6 +2,7 @@ package eu.markus_fischer.unikram.mailfisch.data
 
 import java.nio.charset.Charset
 
+//TODO use multimap for headers
 open class Mail (private var headers : MutableMap<String, Header> = mutableMapOf(),
                  var raw_header : String = "",
                  var raw_content : String = ""){
@@ -42,9 +43,42 @@ open class Mail (private var headers : MutableMap<String, Header> = mutableMapOf
         }
     }
 
+    fun addHeader(name : String, value : HeaderValue) {
+        if (isPureASCII(name) && isPureASCII(value.toString())) {
+            var headerValue : HeaderValue = when(name.toLowerCase()) {
+                "date", "resent-date" -> {
+                    if (value is HeaderValueDate) {
+                        value
+                    } else {
+                        throw IllegalArgumentException("date and resent-date could be only from type HeaderValueDate")
+                    }
+                }
+                "from", "resent-from", "reply-to", "to", "resent-to", "resent-cc", "cc",
+                "resent-bcc", "bcc" -> {
+                    if (value is HeaderValueAddressList) value else throw IllegalArgumentException("HeaderValueAddressList required but not given")
+                }
+                "sender", "resent-sender" -> {
+                    if (value is HeaderValueAddressList && value.single_mailbox) value else throw IllegalArgumentException("HeaderValueAddressList with single_mailbox required but not given")
+                }
+                "message-id" -> {
+                    if (value is HeaderValueMessageIdList && value.single_id) value else throw IllegalArgumentException("HeaderValueMessageIdList with single_id required but not given!")
+                }
+                "in-reply-to", "references" -> {
+                    if (value is HeaderValueMessageIdList) value else throw IllegalArgumentException("HeaderValueMessageIdList required but not given!")
+                }
+                else -> value
+            }
+            headers.put(name.toLowerCase(), Header(name.toLowerCase(), headerValue))
+        } else {
+            throw IllegalArgumentException("The header was not encoded in US-ASCII!")
+        }
+    }
+
     fun getAllHeaderKeys() = headers.keys.toString()
 
     fun getHeader(name : String) : Header = headers.get(name.toLowerCase()) ?: Header(name.toLowerCase(), HeaderValueString(""))
+
+    fun hasHeader(name : String) : Boolean = headers.containsKey(name.toLowerCase())
 
     private fun unfold(entry : String) : String = entry.replace(Regex("((([\t ]*\n)?[\t ]+)|([\t ]+(\n[\t ]+)))"), " ")
 
@@ -56,16 +90,17 @@ open class Mail (private var headers : MutableMap<String, Header> = mutableMapOf
     fun prepareToSend() : String {
         var result = ""
         for ((name, header) in headers) {
-            result += "${header.getFoldedHeader()}"
+            if (!name.equals("bcc", ignoreCase = true)) { //removing bcc header
+                result += "${header.getFoldedHeader()}"
+            }
         }
-        result += "\n\n"
+        result += "\n"
         for (line in raw_content.split('\n')) {
             if (line[0] == '.'){
                 result += '.'
             }
             result += "$line\n"
         }
-        result += raw_content //TODO fold content
         return result.replace("\n", "\r\n")
     }
 }

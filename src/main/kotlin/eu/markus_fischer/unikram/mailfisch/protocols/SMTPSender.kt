@@ -1,9 +1,8 @@
 package eu.markus_fischer.unikram.mailfisch.protocols
 
-import eu.markus_fischer.unikram.mailfisch.data.HeaderValueAddressList
-import eu.markus_fischer.unikram.mailfisch.data.Mail
-import eu.markus_fischer.unikram.mailfisch.data.SendProtocol
+import eu.markus_fischer.unikram.mailfisch.data.*
 import eu.markus_fischer.unikram.mailfisch.data.addresses.Address
+import eu.markus_fischer.unikram.mailfisch.data.addresses.Mailbox
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.io.PrintStream
@@ -19,7 +18,8 @@ class SMTPSender(var hostname: String,
                  var port: Int = SendProtocol.SMTP.port,
                  var use_ssl: Boolean = false,
                  var use_starttls : Boolean = true,
-                 var strict_starttls : Boolean = true) : ISender {
+                 var strict_starttls : Boolean = true,
+                 var bcc_as_single_mail : Boolean = false) : ISender {
 
     private var socket : Socket? = null
     private var use_tls : Boolean = false
@@ -77,16 +77,13 @@ class SMTPSender(var hostname: String,
             } else if (arg1.last() != '\n') {
                 arg += "\r\n"
             }
-            print(if (arg1 == "") cmd else "$cmd $arg")
             output_stream?.print(if (arg1 == "") cmd else "$cmd $arg")
             val command_output : MutableList<String> = mutableListOf()
             var smtp_return = input_stream?.readLine().toString()
-            print(smtp_return)
             val status = smtp_return.substring(0, 3).toInt()
             command_output.add(smtp_return)
             while (smtp_return[3] == '-') {
                 smtp_return = input_stream?.readLine().toString()
-                print(smtp_return)
                 command_output.add(smtp_return)
             }
             return Pair(status, command_output.toList())
@@ -167,12 +164,22 @@ class SMTPSender(var hostname: String,
                 return false
             } else {
                 //PLAIN must be supported
+                //TODO do something with other status codes
                 var plain_login = user+'\u0000'+user+'\u0000'+password
-                println(sendCommand("auth plain", Base64.getEncoder().encodeToString(plain_login.toByteArray())))
+                when(sendCommand("auth plain", Base64.getEncoder().encodeToString(plain_login.toByteArray())).first) {
+                    235 -> return true
+                    432 -> return false //missing password
+                    454 -> return false //temporary authentication failed
+                    534 -> return false //to weak auth method
+                    535 -> return false //authentication credentials invalid
+                    500 -> return false //authentication exchange line too long
+                    538 -> return false //encryption required
+                }
                 return true
             }
         } else {
             //SMTP after POP
+            //TODO implement SMTP after POP
             return false
         }
     }
@@ -198,12 +205,62 @@ class SMTPSender(var hostname: String,
     }
 
     override fun sendMail(mail: Mail): Boolean {
-        val from =  (mail.getHeader("from").value as HeaderValueAddressList).address_list.get(0).mailbox.getMailAddress()
-        val to =  (mail.getHeader("to").value as HeaderValueAddressList).address_list.get(0).mailbox.getMailAddress()
-        println(sendCommand("MAIL", "FROM:<$from>"))
-        println(sendCommand("RCPT", "TO:<$to>"))
+        if (!mail.hasHeader("from") || !mail.hasHeader("to")) {
+            return false //no vaild mail
+        }
+        if ((((mail.getHeader("from").value as HeaderValueAddressList).address_list.size > 1) ||
+            ((mail.getHeader("from").value as HeaderValueAddressList).address_list[0].getMailboxes().size > 1)) &&
+            !(mail.hasHeader("sender"))) {
+            return false //multiple from but no sender given
+        }
+        val smtp_from = if (mail.hasHeader("sender")) (mail.getHeader("sender") as HeaderValueAddressList).address_list[0].getMailboxes()[0]
+                                else (mail.getHeader("from").value as HeaderValueAddressList).address_list[0].mailbox
+        val smtp_rcpt_to : MutableList<Mailbox> = mutableListOf()
+        val smtp_rcpt_to_bcc : MutableList<Mailbox> = mutableListOf()
+        for (address in (mail.getHeader("to").value as HeaderValueAddressList).address_list) {
+            for (mailbox in address.getMailboxes()) {
+                smtp_rcpt_to.add(mailbox)
+            }
+        }
+        if (mail.hasHeader("cc")) {
+            for (address in (mail.getHeader("cc").value as HeaderValueAddressList).address_list) {
+                for (mailbox in address.getMailboxes()) {
+                    smtp_rcpt_to.add(mailbox)
+                }
+            }
+        }
+        if (mail.hasHeader("bcc")) {
+            for (address in (mail.getHeader("bcc").value as HeaderValueAddressList).address_list) {
+                for (mailbox in address.getMailboxes()) {
+                    smtp_rcpt_to_bcc.add(mailbox)
+                }
+            }
+        }
+        if (!mail.hasHeader("date")) {
+            mail.addHeader("date", HeaderValueDate())
+        }
+        if (!mail.hasHeader("message-id")) {
+            mail.addHeader("message-id", HeaderValueMessageIdList(mutableListOf(MessageID(smtp_from)), true))
+        }
+        println(sendCommand("MAIL", "FROM:<${smtp_from.getMailAddress()}>"))
+        for (mailbox in smtp_rcpt_to) {
+            println(sendCommand("RCPT", "TO:<${mailbox.getMailAddress()}>"))
+        }
+        if (!bcc_as_single_mail) {
+            for (mailbox in smtp_rcpt_to_bcc) {
+                println(sendCommand("RCPT", "TO:<${mailbox.getMailAddress()}>"))
+            }
+        }
         println(sendCommand("DATA"))
         println(sendCommand("${mail.prepareToSend()}\r\n.\r\n"))
+        if (bcc_as_single_mail) {
+            for (mailbox in smtp_rcpt_to_bcc) {
+                println(sendCommand("MAIL", "FROM:<${smtp_from.getMailAddress()}>"))
+                println(sendCommand("RCPT", "TO:<${mailbox.getMailAddress()}>"))
+                println(sendCommand("DATA"))
+                println(sendCommand("${mail.prepareToSend()}\r\n.\r\n"))
+            }
+        }
         return true
     }
 

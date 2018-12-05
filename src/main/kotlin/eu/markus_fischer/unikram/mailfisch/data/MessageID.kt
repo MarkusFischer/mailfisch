@@ -14,7 +14,7 @@ class MessageID (lpart : String,
 
     constructor(msgid : String) : this("", "") {
         val working_string = removeRFC5322Comments(msgid)
-        val (lpart, gpart)= removeRFC5322Comments(msgid).substring(1, working_string.length).split('@', limit=2)
+        val (lpart, gpart)= removeRFC5322Comments(msgid).substring(1, working_string.length-1).split('@', limit=2)
         local_part = lpart
         global_part = gpart
     }

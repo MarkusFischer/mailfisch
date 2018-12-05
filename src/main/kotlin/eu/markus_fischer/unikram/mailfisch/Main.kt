@@ -54,7 +54,7 @@ fun main(args : Array<String>) {
 
     println("Connecting... ")*/
     println("mailfisch v2")
-    /*val test_account = Account(remote_income_server = "pop.mail.de",
+    val test_account = Account(remote_income_server = "pop.mail.de",
                                 remote_income_protocol = ReceiveProtocol.POP3S,
                                 remote_income_port = 995,
                                 remote_out_server = "smtp.mail.de",
@@ -63,8 +63,8 @@ fun main(args : Array<String>) {
                                 use_starttls_out = true,
                                 mail_adress = "mf.dev@mail.de",
                                 user = "mf.dev",
-                                password = "GanzSicheresPasswort")*/
-    val test_account = Account(remote_income_server = "pop.mail.de",
+                                password = "GanzSicheresPasswort")
+    /*val test_account = Account(remote_income_server = "pop.mail.de",
             remote_income_protocol = ReceiveProtocol.POP3S,
             remote_income_port = 995,
             remote_out_server = "server.inc.li",
@@ -73,7 +73,7 @@ fun main(args : Array<String>) {
             use_starttls_out = true,
             mail_adress = "igel@inc.li",
             user = "igel@inc.li",
-            password = "j9rbb3gFCc")
+            password = "j9rbb3gFCc")*/
     val sender : ISender = SMTPSender(hostname = test_account.remote_out_server,
                                         port = test_account.remote_out_port,
                                         use_ssl = false)
@@ -82,8 +82,10 @@ fun main(args : Array<String>) {
     testmail.raw_content="Das ist eine tolle Testmail!"
     testmail.addHeader("from", test_account.mail_adress)
     testmail.addHeader("to", "ich@markus-fischer.eu")
+    testmail.addHeader("cc", "markus.fischer@uni-jena.de")
+    testmail.addHeader("bcc", "foto@markus-fischer.eu")
     testmail.addHeader("subject", "Testmail")
-    testmail.addHeader("date", DateTimeFormatter.RFC_1123_DATE_TIME.format(ZonedDateTime.now()))
+    //testmail.addHeader("date", DateTimeFormatter.RFC_1123_DATE_TIME.format(ZonedDateTime.now()))
     if (sender.connect()) {
         println("Connected!")
         println("Init...")
