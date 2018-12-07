@@ -12,6 +12,7 @@ repositories {
 
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+    compile 'no.tornado:tornadofx:1.7.17'
     //compile "org.jetbrains.kotlinx:kotlinx-coroutines-core:0.26"
 }
 
