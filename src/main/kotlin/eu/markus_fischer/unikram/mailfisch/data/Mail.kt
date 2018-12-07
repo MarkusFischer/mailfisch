@@ -102,6 +102,6 @@ open class Mail (private var headers : MutableMap<String, Header> = mutableMapOf
             }
             result += "$line\n"
         }
-        return result.replace("\n", "\r\n")
+        return result.replace("\n", "\r\n") //TODO \r\n schon vorhanden behandeln
     }
 }
