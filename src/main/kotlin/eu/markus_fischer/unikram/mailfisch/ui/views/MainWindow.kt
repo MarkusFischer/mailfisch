@@ -16,6 +16,7 @@ class MainWindow : View("Mailfisch - Hauptfenster") {
             }
             menu("Edit") {
                 item("Options")
+                item("Account config <temp>", "Shortcut+K").action { find<AccountCreateWizard>().openWindow(stageStyle = StageStyle.DECORATED) }
             }
             menu("Help") {
                 item("About")

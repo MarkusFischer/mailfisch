@@ -16,28 +16,27 @@ class NewMailDialog : Fragment("New Mail") {
                 button("Save")
             }
 
-            hbox {
-                form {
-                    useMaxWidth = true
+            form {
+                fieldset {
                     paddingRight = 0
-                    fieldset {
-                        paddingRight = 0
-                        useMaxWidth = true
-                        field("From") {
-                            textfield()
-                        }
-                        field("To") {
-                            textfield()
-                        }
-                        field("Cc") {
-                            textfield()
-                        }
-                        field("Bcc") {
-                            textfield()
-                        }
-                        field("Subject") {
-                            textfield()
-                        }
+                    paddingTop = 0
+                    paddingBottom = 0
+                    useMaxWidth = true
+                    spacing = 0.0
+                    field("From") {
+                        textfield()
+                    }
+                    field("To") {
+                        textfield()
+                    }
+                    field("Cc") {
+                        textfield()
+                    }
+                    field("Bcc") {
+                        textfield()
+                    }
+                    field("Subject") {
+                        textfield()
                     }
                 }
             }
