@@ -12,7 +12,7 @@ enum class SendProtocol(val port: Int) {
     SMTPS(465)
 }
 
-data class Account(var remote_income_server: String,
+data class Account_old(var remote_income_server: String,
                    var remote_income_protocol: ReceiveProtocol,
                    var remote_income_port: Int = remote_income_protocol.port,
                    var use_starttls_income: Boolean = false,
