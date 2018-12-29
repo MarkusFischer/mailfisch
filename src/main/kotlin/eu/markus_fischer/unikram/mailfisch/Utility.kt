@@ -1,5 +1,11 @@
 package eu.markus_fischer.unikram.mailfisch
 
+import org.joda.time.DateTime
+import org.joda.time.DateTimeUtils.getZone
+import org.joda.time.DateTimeZone
+import java.time.ZonedDateTime
+
+
 fun removeRFC5322Comments(string_with_comments : String) : String {
     var unquoted_open_bracket = false
     var unquoted_open_bracket_pos = -1
@@ -114,4 +120,13 @@ fun getCharPositions(raw_string : String,
         }
     }
     return positionList.toList()
+}
+
+fun zonedDateTimeToDateTime(zdt : ZonedDateTime) : DateTime {
+    val timeZone = DateTimeZone.forID(zdt.getZone().getId())
+    return DateTime(zdt.toInstant().toEpochMilli(), timeZone)
+}
+
+fun dateTimeToZonedDateTime(dateTime: DateTime) : ZonedDateTime {
+    return dateTime.toGregorianCalendar().toZonedDateTime() //Slow but easy
 }

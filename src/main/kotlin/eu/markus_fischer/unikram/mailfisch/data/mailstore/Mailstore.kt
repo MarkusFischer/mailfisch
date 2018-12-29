@@ -4,31 +4,31 @@ import eu.markus_fischer.unikram.mailfisch.data.HeaderValueAddressList
 import eu.markus_fischer.unikram.mailfisch.data.HeaderValueDate
 import eu.markus_fischer.unikram.mailfisch.data.HeaderValueString
 import eu.markus_fischer.unikram.mailfisch.data.Mail
+import eu.markus_fischer.unikram.mailfisch.protocols.IMAPFlags
 import java.time.ZonedDateTime
 import java.util.*
 
+
 interface Mailstore {
-    fun storeMail(mail : Mail) : UUID
-    fun deleteMail(uuid : UUID)
+    fun storeMail(mail: Mail, serverid: String = "", flag: Int = 0, mailbox: String = "") : UUID
+    fun deleteMail(uuid : UUID) : Boolean
     fun getMail(uuid : UUID) : Mail
 
+    //TODO decide if this is really necessary -> could be retrieved out of mail
     fun getSubject(uuid: UUID) : HeaderValueString
     fun getFrom(uuid: UUID) : HeaderValueAddressList
     fun getTo(uuid: UUID) : HeaderValueAddressList
     fun getDate(uuid: UUID) : HeaderValueDate
 
-    fun isDraft(uuid: UUID) : Boolean
-    fun wasSent(uuid: UUID) : Boolean
-    fun modifyMail(uuid: UUID, mail: Mail)
-    fun moveDraftToSent(uuid: UUID)
+    fun getFlags(uuid: UUID) : List<IMAPFlags>
+    fun modifyMail(uuid: UUID, mail: Mail = Mail(mutableMapOf(), ""), flag: Int = 0, mailbox: String = "")
 
-    fun isUnread(uuid: UUID) : Boolean
-    fun markUnread(unread : Boolean)
 
-    fun getMails(date : ZonedDateTime) : List<Mail>
-    fun getMails() : List<Mail>
-    fun getMailIds() : List<UUID>
 
-    fun hasMailStored(pop3id : String) : Boolean
-    fun getStoredMailsPOPID() : List<String>
+    //TODO filter for more fields
+    fun getMails(date : ZonedDateTime, mailbox: String = "") : List<UUID>
+    fun getMails(flags: Int = 0, mailbox: String = "") : List<UUID>
+    fun getMails(mailbox: String = "") : List<UUID>
+
+    fun getStoredMailsServerIds() : List<String>
 }

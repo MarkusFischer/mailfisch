@@ -4,8 +4,22 @@ import java.nio.charset.Charset
 
 //TODO use multimap for headers
 open class Mail (private var headers : MutableMap<String, Header> = mutableMapOf(),
-                 var raw_header : String = "",
+                 raw_header : String = "",
                  var raw_content : String = ""){
+    var raw_header : String = raw_header
+        get() {
+            if (raw_header == "") {
+                var result = ""
+                for ((name, header) in headers) {
+                    if (!name.equals("bcc", ignoreCase = true)) { //removing bcc header
+                        result += "${header.getFoldedHeader()}"
+                    }
+                }
+                return result
+            } else {
+                return raw_header //todo add headers that were added later
+            }
+        }
 
     constructor(raw_mail : String) : this() {
         val splitted_mail = raw_mail.split(Regex("(?m)^$"), limit = 2)
