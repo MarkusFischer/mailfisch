@@ -2,6 +2,7 @@ package eu.markus_fischer.unikram.mailfisch.protocols
 
 import eu.markus_fischer.unikram.mailfisch.data.Mail
 import eu.markus_fischer.unikram.mailfisch.data.ReceiveProtocol
+import eu.markus_fischer.unikram.mailfisch.data.mailstore.Mailstore
 import eu.markus_fischer.unikram.mailfisch.network.Session
 import java.io.*
 import java.lang.Exception
@@ -161,5 +162,37 @@ class POP3Receiver(var hostname: String,
         } else {
             return false
         }
+    }
+
+    fun getUID(id : Int) : Pair<Boolean, String> {
+        val (success, line) = sendCommand("UIDL", arg1=id.toString())
+        if (success)
+            return Pair(success, line[0].split(' ', limit=3)[2])
+        else
+            return Pair(success, "")
+    }
+
+    fun storeMail(id : Int, mailstore: Mailstore) : Boolean {
+        val (success, mail) = getMail(id)
+        val (suc, uid) = getUID(id)
+        val defaultFlags = (0x00 or IMAPFlags.RECENT.bitmask)
+        val mailbox = "inbox"
+        if (success)
+            mailstore.storeMail(mail, uid, defaultFlags, mailbox)
+        return success
+    }
+
+    fun storeNewMails(mailstore: Mailstore) : Boolean {
+        val storedMails = mailstore.getStoredMailsServerIds()
+        val (success, lines) = sendCommand("UIDL")
+        if (success) {
+            for (i in 1..lines.size) {
+                val (nid, uid) = lines[i].split(' ', limit=2)
+                if (uid !in storedMails) {
+                    storeMail(nid.toInt(), mailstore)
+                }
+            }
+        }
+        return success
     }
 }
