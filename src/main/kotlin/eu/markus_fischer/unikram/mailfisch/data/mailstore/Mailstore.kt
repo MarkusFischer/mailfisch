@@ -10,6 +10,9 @@ import java.util.*
 
 
 interface Mailstore {
+
+    fun initMailStore()
+
     fun storeMail(mail: Mail, serverid: String = "", flag: Int = 0, mailbox: String = "") : UUID
     fun deleteMail(uuid : UUID) : Boolean
     fun getMail(uuid : UUID) : Mail

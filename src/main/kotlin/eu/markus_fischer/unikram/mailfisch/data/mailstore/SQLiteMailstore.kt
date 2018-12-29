@@ -11,8 +11,10 @@ import eu.markus_fischer.unikram.mailfisch.protocols.isFlagSet
 import eu.markus_fischer.unikram.mailfisch.zonedDateTimeToDateTime
 import org.jetbrains.exposed.dao.UUIDTable
 import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.joda.time.DateTime
+import java.sql.Connection
 import java.time.ZonedDateTime
 import java.util.*
 
@@ -38,8 +40,9 @@ object Mails : UUIDTable() {
 //TODO single mailstore for each account
 class SQLiteMailstore : Mailstore {
 
-    fun initMailStore() {
+    override fun initMailStore() {
         Database.connect("jdbc:sqlite:data/data.db", "org.sqlite.JDBC")
+        TransactionManager.manager.defaultIsolationLevel = Connection.TRANSACTION_SERIALIZABLE
         transaction {
             SchemaUtils.create(Mails)
         }
@@ -54,7 +57,7 @@ class SQLiteMailstore : Mailstore {
                 it[to] = mail.getHeader("to").value.toString()
                 it[cc] = mail.getHeader("cc").value.toString()
                 it[subject] = mail.getHeader("subject").value.toString()
-                it[date] = DateTime((mail.getHeader("date").value as HeaderValueDate).date.toLocalDateTime())
+                it[date] = zonedDateTimeToDateTime((mail.getHeader("date").value as HeaderValueDate).date)
                 it[header_msg_id] = mail.getHeader("message-id").value.toString()
                 it[references] = mail.getHeader("references").value.toString()
                 it[server_id] = serverid
@@ -124,7 +127,6 @@ class SQLiteMailstore : Mailstore {
 
 
     override fun modifyMail(uuid: UUID, mail: Mail, flag: Int, mailbox: String) {
-        //TODO decide how intelligent the mailstorage should be
         transaction {
             Mails.update({ Mails.id eq uuid }) {
                 it[raw_header] = mail.raw_header
@@ -133,7 +135,7 @@ class SQLiteMailstore : Mailstore {
                 it[to] = mail.getHeader("to").value.toString()
                 it[cc] = mail.getHeader("cc").value.toString()
                 it[subject] = mail.getHeader("subject").value.toString()
-                it[date] = DateTime((mail.getHeader("date").value as HeaderValueDate).date.toLocalDateTime())
+                it[date] = zonedDateTimeToDateTime((mail.getHeader("date").value as HeaderValueDate).date)
                 it[header_msg_id] = mail.getHeader("message-id").value.toString()
                 it[references] = mail.getHeader("references").value.toString()
                 it[flags] = flag

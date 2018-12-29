@@ -184,9 +184,9 @@ class POP3Receiver(var hostname: String,
 
     fun storeNewMails(mailstore: Mailstore) : Boolean {
         val storedMails = mailstore.getStoredMailsServerIds()
-        val (success, lines) = sendCommand("UIDL")
+        val (success, lines) = sendCommand("UIDL", multiple_return_values = true)
         if (success) {
-            for (i in 1..lines.size) {
+            for (i in 1..lines.size - 2) { //array index and ignoring '.'
                 val (nid, uid) = lines[i].split(' ', limit=2)
                 if (uid !in storedMails) {
                     storeMail(nid.toInt(), mailstore)

@@ -123,8 +123,8 @@ fun getCharPositions(raw_string : String,
 }
 
 fun zonedDateTimeToDateTime(zdt : ZonedDateTime) : DateTime {
-    val timeZone = DateTimeZone.forID(zdt.getZone().getId())
-    return DateTime(zdt.toInstant().toEpochMilli(), timeZone)
+    //val timeZone = DateTimeZone.forID(zdt.getZone().getId())
+    return DateTime(zdt.toInstant().toEpochMilli())//, timeZone)
 }
 
 fun dateTimeToZonedDateTime(dateTime: DateTime) : ZonedDateTime {
