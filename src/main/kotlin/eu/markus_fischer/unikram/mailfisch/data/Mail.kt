@@ -1,5 +1,6 @@
 package eu.markus_fischer.unikram.mailfisch.data
 
+import eu.markus_fischer.unikram.mailfisch.data.headers.*
 import java.nio.charset.Charset
 
 //TODO use multimap for headers

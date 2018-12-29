@@ -1,8 +1,10 @@
 package eu.markus_fischer.unikram.mailfisch.protocols
 
 import eu.markus_fischer.unikram.mailfisch.data.*
-import eu.markus_fischer.unikram.mailfisch.data.addresses.Address
 import eu.markus_fischer.unikram.mailfisch.data.addresses.Mailbox
+import eu.markus_fischer.unikram.mailfisch.data.headers.HeaderValueAddressList
+import eu.markus_fischer.unikram.mailfisch.data.headers.HeaderValueDate
+import eu.markus_fischer.unikram.mailfisch.data.headers.HeaderValueMessageIdList
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.io.PrintStream

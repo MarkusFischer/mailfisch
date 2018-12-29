@@ -1,8 +1,8 @@
 package eu.markus_fischer.unikram.mailfisch.data.mailstore
 
-import eu.markus_fischer.unikram.mailfisch.data.HeaderValueAddressList
-import eu.markus_fischer.unikram.mailfisch.data.HeaderValueDate
-import eu.markus_fischer.unikram.mailfisch.data.HeaderValueString
+import eu.markus_fischer.unikram.mailfisch.data.headers.HeaderValueAddressList
+import eu.markus_fischer.unikram.mailfisch.data.headers.HeaderValueDate
+import eu.markus_fischer.unikram.mailfisch.data.headers.HeaderValueString
 import eu.markus_fischer.unikram.mailfisch.data.Mail
 import eu.markus_fischer.unikram.mailfisch.protocols.IMAPFlags
 import java.time.ZonedDateTime

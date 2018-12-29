@@ -1,8 +1,8 @@
 package eu.markus_fischer.unikram.mailfisch.data.mailstore
 
-import eu.markus_fischer.unikram.mailfisch.data.HeaderValueAddressList
-import eu.markus_fischer.unikram.mailfisch.data.HeaderValueDate
-import eu.markus_fischer.unikram.mailfisch.data.HeaderValueString
+import eu.markus_fischer.unikram.mailfisch.data.headers.HeaderValueAddressList
+import eu.markus_fischer.unikram.mailfisch.data.headers.HeaderValueDate
+import eu.markus_fischer.unikram.mailfisch.data.headers.HeaderValueString
 import eu.markus_fischer.unikram.mailfisch.data.Mail
 import eu.markus_fischer.unikram.mailfisch.dateTimeToZonedDateTime
 import eu.markus_fischer.unikram.mailfisch.protocols.IMAPFlags
@@ -86,7 +86,7 @@ class SQLiteMailstore : Mailstore {
 
     override fun getSubject(uuid: UUID): HeaderValueString {
         return transaction {
-            HeaderValueString(Mails.slice(Mails.subject).select{Mails.id eq uuid}.withDistinct().map {
+            HeaderValueString(Mails.slice(Mails.subject).select { Mails.id eq uuid }.withDistinct().map {
                 it[Mails.subject]
             }[0])
         }
@@ -94,7 +94,7 @@ class SQLiteMailstore : Mailstore {
 
     override fun getFrom(uuid: UUID): HeaderValueAddressList {
         return transaction {
-            HeaderValueAddressList(Mails.slice(Mails.from).select{Mails.id eq uuid}.withDistinct().map {
+            HeaderValueAddressList(Mails.slice(Mails.from).select { Mails.id eq uuid }.withDistinct().map {
                 it[Mails.from]
             }[0])
         }
@@ -102,7 +102,7 @@ class SQLiteMailstore : Mailstore {
 
     override fun getTo(uuid: UUID): HeaderValueAddressList {
         return transaction {
-            HeaderValueAddressList(Mails.slice(Mails.to).select{Mails.id eq uuid}.withDistinct().map {
+            HeaderValueAddressList(Mails.slice(Mails.to).select { Mails.id eq uuid }.withDistinct().map {
                 it[Mails.to]
             }[0])
         }
@@ -110,7 +110,7 @@ class SQLiteMailstore : Mailstore {
 
     override fun getDate(uuid: UUID): HeaderValueDate {
         return transaction {
-            HeaderValueDate(dateTimeToZonedDateTime(Mails.slice(Mails.date).select{Mails.id eq uuid}.withDistinct().map {
+            HeaderValueDate(dateTimeToZonedDateTime(Mails.slice(Mails.date).select { Mails.id eq uuid }.withDistinct().map {
                 it[Mails.date]
             }[0]))
         }
