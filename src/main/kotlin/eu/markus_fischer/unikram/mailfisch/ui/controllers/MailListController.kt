@@ -37,15 +37,6 @@ class MailShow() {
     var attachmentList = mutableListOf<File>().observable()
 }
 
-class MailShowModel : ItemViewModel<MailShow>() {
-    val from = bind(MailShow::fromProperty)
-    val subject = bind(MailShow::subjectProperty)
-    val to = bind(MailShow::toProperty)
-    val cc = bind(MailShow::ccProperty)
-    val content = bind(MailShow::contentProperty)
-}
-
-
 class MailListController : Controller() {
 
     override val configPath = app.configBasePath.resolve("app.config")
@@ -58,7 +49,6 @@ class MailListController : Controller() {
     var current_mail_folder : MailFolder = mailbox_list
 
     val showed_mail : MailShow = MailShow()
-    val showed_model = MailShowModel()
 
     fun update_mail_summary_list(folder : MailFolder) {
         val path = buildReversePath(folder)
