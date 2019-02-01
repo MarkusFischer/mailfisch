@@ -1,10 +1,17 @@
 package eu.markus_fischer.unikram.mailfisch.data
 
 import eu.markus_fischer.unikram.mailfisch.data.headers.*
+import javafx.beans.property.SimpleBooleanProperty
+import org.joda.time.DateTime
+import tornadofx.*
+import java.lang.Exception
+import java.lang.reflect.GenericArrayType
 import java.nio.charset.Charset
+import java.util.*
+import javax.mail.internet.MimeUtility
 
 //TODO use multimap for headers
-open class Mail (private var headers : MutableMap<String, Header> = mutableMapOf(),
+open class Mail (protected var headers : MutableMap<String, Header> = mutableMapOf(),
                  var raw_header : String = "",
                  var raw_content : String = ""){
 
@@ -13,8 +20,10 @@ open class Mail (private var headers : MutableMap<String, Header> = mutableMapOf
         val unfolded_header = unfold(splitted_mail[0])
         //subject = Regex("Subject[\t ]*:(([\t \\p{Print}]*[\t ]*)|((\n*\r*([^\t\n\r]\n*\r*)*)|[\t ]*)*)\n").find(unfolded_header)?.value?.split(':')?.get(1) ?: ""
         for (line in unfolded_header.trim().lines()) {
-            val (key, value) = line.split(':', limit=2)
-            addHeader(key.trim(), value.trim())
+            try {
+                val (key, value) = line.split(':', limit=2)
+                addHeader(key.trim(), value.trim())
+            } catch (except : Exception) {}
         }
         raw_header = splitted_mail[0]
         raw_content = splitted_mail[1]
@@ -27,7 +36,7 @@ open class Mail (private var headers : MutableMap<String, Header> = mutableMapOf
     protected val ascii_encoder = Charset.forName("US-ASCII").newEncoder()
     protected fun isPureASCII(str : String) : Boolean = ascii_encoder.canEncode(str)
 
-    fun addHeader(name : String, value : String) {
+    open fun addHeader(name : String, value : String) {
         if (isPureASCII(name) && isPureASCII(value)) {
             var headerValue : HeaderValue = when(name.toLowerCase()) {
                 "date", "resent-date" -> HeaderValueDate(value)
@@ -38,7 +47,7 @@ open class Mail (private var headers : MutableMap<String, Header> = mutableMapOf
                 "in-reply-to", "references" -> HeaderValueMessageIdList(value)
                 else -> HeaderValueString(value)
             }
-            headers.put(name.toLowerCase(), Header(name.toLowerCase(), headerValue))
+            addHeader(name, headerValue)
         } else {
             throw IllegalArgumentException("The header was not encoded in US-ASCII!")
         }
@@ -70,7 +79,10 @@ open class Mail (private var headers : MutableMap<String, Header> = mutableMapOf
                 else -> value
             }
             headers.put(name.toLowerCase(), Header(name.toLowerCase(), headerValue))
-            raw_header += "$name: ${headerValue.getFoldRepresentation(name.length)}\n"
+            raw_header += "$name: ${headerValue.getFoldRepresentation(name.length)}"
+            if (raw_header[raw_header.length - 1] != '\n') {
+                raw_header += '\n'
+            }
         } else {
             throw IllegalArgumentException("The header was not encoded in US-ASCII!")
         }
@@ -82,18 +94,18 @@ open class Mail (private var headers : MutableMap<String, Header> = mutableMapOf
 
     fun hasHeader(name : String) : Boolean = headers.containsKey(name.toLowerCase())
 
-    private fun unfold(entry : String) : String = entry.replace(Regex("((([\t ]*\n)?[\t ]+)|([\t ]+(\n[\t ]+)))"), " ")
+    protected fun unfold(entry : String) : String = entry.replace(Regex("((([\t ]*\n)?[\t ]+)|([\t ]+(\n[\t ]+)))"), " ")
 
     override fun toString(): String {
         return "Header: ${unfold(raw_header)}" +
                 "Content: $raw_content"
     }
 
-    fun prepareToSend() : String {
+    open fun prepareToSend() : String {
         var result = ""
         for ((name, header) in headers) {
             if (!name.equals("bcc", ignoreCase = true)) { //removing bcc header
-                result += "${header.getFoldedHeader()}"
+                result += header.getFoldedHeader()
             }
         }
         result += "\n"
@@ -106,4 +118,45 @@ open class Mail (private var headers : MutableMap<String, Header> = mutableMapOf
         }
         return result.replace("\n", "\r\n") //TODO \r\n schon vorhanden behandeln
     }
+
+    open fun getTextContent() : String {
+        println("Mail.getTextContent()")
+        return removeDots(raw_content)
+    }
+
+    protected fun removeDots(str : String) : String {
+        var lines =  str.trim().split('\n')
+        var res = ""
+        for (line in lines) {
+            if (line.isNotEmpty()) {
+                if (line[0] == '.') {
+                    res += "${line.substring(1)} \n"
+                } else {
+                    res += "$line \n"
+                }
+            }
+        }
+        return res
+    }
+
+    open fun prepareToSave() {
+        //do nothing...
+    }
+}
+
+//class for most important information
+class MailSummary (val from : String,
+                   val to: String,
+                   subject: String,
+                   val date: DateTime,
+                   val uuid: UUID,
+                   unseen: Boolean){
+
+    val unseenProperty = SimpleBooleanProperty(unseen)
+    var unseen by unseenProperty
+
+    private var raw_subject = subject
+    var subject = ""
+        private set
+        get() { return MimeUtility.decodeText(raw_subject)}
 }

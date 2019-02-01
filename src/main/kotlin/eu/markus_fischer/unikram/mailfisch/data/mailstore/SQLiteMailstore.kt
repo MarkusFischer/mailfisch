@@ -1,14 +1,18 @@
 package eu.markus_fischer.unikram.mailfisch.data.mailstore
 
+import eu.markus_fischer.unikram.mailfisch.data.MIMEMail
 import eu.markus_fischer.unikram.mailfisch.data.headers.HeaderValueAddressList
 import eu.markus_fischer.unikram.mailfisch.data.headers.HeaderValueDate
 import eu.markus_fischer.unikram.mailfisch.data.headers.HeaderValueString
 import eu.markus_fischer.unikram.mailfisch.data.Mail
+import eu.markus_fischer.unikram.mailfisch.data.MailSummary
 import eu.markus_fischer.unikram.mailfisch.dateTimeToZonedDateTime
 import eu.markus_fischer.unikram.mailfisch.protocols.IMAPFlags
 import eu.markus_fischer.unikram.mailfisch.protocols.getSettedFlags
 import eu.markus_fischer.unikram.mailfisch.protocols.isFlagSet
 import eu.markus_fischer.unikram.mailfisch.zonedDateTimeToDateTime
+import org.jetbrains.exposed.dao.IdTable
+import org.jetbrains.exposed.dao.IntIdTable
 import org.jetbrains.exposed.dao.UUIDTable
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.TransactionManager
@@ -34,21 +38,77 @@ object Mails : UUIDTable() {
     val mailbox: Column<String> = text("mailbox")
 }
 
+object Mailboxes : IntIdTable() {
+    val mailbox: Column<String> = text("mailbox")
+}
 
 
 
 //TODO single mailstore for each account
 class SQLiteMailstore : Mailstore {
 
-    override fun initMailStore() {
-        Database.connect("jdbc:sqlite:data/data.db", "org.sqlite.JDBC")
+    /*constructor() {
         TransactionManager.manager.defaultIsolationLevel = Connection.TRANSACTION_SERIALIZABLE
+    }*/
+
+    companion object {
+        var connected = false
+    }
+
+    override fun getMailboxes(): List<String> {
+        return transaction {
+            Mailboxes.selectAll().withDistinct().map { it[Mailboxes.mailbox] }
+        }
+    }
+
+    override fun initMailStore() {
+        if (!connected) {
+            Database.connect("jdbc:sqlite:data/data.db", "org.sqlite.JDBC")
+            TransactionManager.manager.defaultIsolationLevel = Connection.TRANSACTION_SERIALIZABLE
+        }
         transaction {
             SchemaUtils.create(Mails)
+            SchemaUtils.create(Mailboxes)
+        }
+        val mailboxes = getMailboxes()
+        if (!mailboxes.contains("inbox")) {
+            transaction {
+                Mailboxes.insert {
+                    it[mailbox] = "inbox" //inbox mailbox is predefined in imap standard
+                }
+            }
+        }
+        if (!mailboxes.contains("draft")) {
+            transaction {
+                Mailboxes.insert {
+                    it[mailbox] = "draft"
+                }
+            }
+        }
+        if (!mailboxes.contains("sent")) {
+            transaction {
+                Mailboxes.insert {
+                    it[mailbox] = "sent"
+                }
+            }
         }
     }
 
     override fun storeMail(mail: Mail, serverid: String, flag: Int, mailbox: String): UUID {
+        var exisiting_mailbox = false
+        val mailboxes = getMailboxes()
+        if (mailbox.toLowerCase() != "inbox") {
+            exisiting_mailbox = mailbox in mailboxes
+        } else {
+            exisiting_mailbox = true
+        }
+        if (!exisiting_mailbox) {
+            transaction {
+                Mailboxes.insert {
+                    it[Mailboxes.mailbox] = mailbox
+                }
+            }
+        }
         return transaction {
             (Mails.insert {
                 it[raw_header] = mail.raw_header
@@ -67,24 +127,22 @@ class SQLiteMailstore : Mailstore {
         }
     }
 
-    override fun deleteMail(uuid: UUID) : Boolean {
+    override fun deleteMail(uuid: UUID) {
         return transaction {
-            val state = Mails.slice(Mails.flags).select{ Mails.id eq uuid }.elementAt(0)[Mails.flags]
-            if (isFlagSet(state, IMAPFlags.DELETED)) {
-                Mails.deleteWhere { Mails.id eq uuid }
-            }
-            false
+            Mails.deleteWhere { Mails.id eq uuid }
         }
     }
 
     override fun getMail(uuid: UUID): Mail {
-        return transaction {
-            val (header, content) = Mails.slice(Mails.raw_header, Mails.content).select { Mails.id eq uuid}.withDistinct().map {
-                it[Mails.raw_header]
-                it[Mails.content]
+        val temp_list = mutableListOf<Mail>()
+        transaction {
+            Mails.slice(Mails.raw_header, Mails.content).select{ Mails.id eq uuid}.first {
+                val header = it[Mails.raw_header]
+                val content = it[Mails.content]
+                temp_list.add(Mail("$header\n\n$content"))
             }
-            Mail("$header\n\n$content")
         }
+        return temp_list[0]
     }
 
     override fun getSubject(uuid: UUID): HeaderValueString {
@@ -120,9 +178,14 @@ class SQLiteMailstore : Mailstore {
     }
 
     override fun getFlags(uuid: UUID): List<IMAPFlags> {
-        return getSettedFlags( transaction {
-            Mails.slice(Mails.flags).select{ Mails.id eq uuid }.elementAt(0)[Mails.flags]
-        })
+        var res = mutableListOf<List<IMAPFlags>>()
+        transaction {
+            Mails.slice(Mails.flags).select { Mails.id eq uuid }.forEach {
+                val flag_int = it[Mails.flags]
+                res.add(getSettedFlags(flag_int))
+            }
+        }
+        return res[0]
     }
 
 
@@ -146,13 +209,13 @@ class SQLiteMailstore : Mailstore {
 
     override fun getMails(date: ZonedDateTime, mailbox: String): List<UUID> {
         val results = transaction {
-            if (mailbox != "") {
+            if (mailbox == "") {
                 Mails.slice(Mails.id).select { (Mails.date eq zonedDateTimeToDateTime(date)) }
             } else {
                 Mails.slice(Mails.id).select { (Mails.date eq zonedDateTimeToDateTime(date)) and (Mails.mailbox eq mailbox) }
+            }.withDistinct().map {
+                it[Mails.id]
             }
-        }.withDistinct().map {
-            it[Mails.id]
         }
         val uuids : MutableList<UUID> = mutableListOf()
         for (result in results) {
@@ -163,13 +226,13 @@ class SQLiteMailstore : Mailstore {
 
     override fun getMails(flags: Int, mailbox: String ): List<UUID> {
         val results = transaction {
-            if (mailbox != "") {
+            if (mailbox == "") {
                 Mails.slice(Mails.id).select { Mails.flags eq flags }
             } else {
                 Mails.slice(Mails.id).select { Mails.flags eq flags and (Mails.mailbox eq mailbox) }
+            }.withDistinct().map {
+                it[Mails.id]
             }
-        }.withDistinct().map {
-            it[Mails.id]
         }
         val uuids : MutableList<UUID> = mutableListOf()
         for (result in results) {
@@ -180,13 +243,14 @@ class SQLiteMailstore : Mailstore {
 
     override fun getMails(mailbox: String): List<UUID> {
         val results = transaction {
-            if (mailbox != "") {
+            if (mailbox == "") {
                 Mails.slice(Mails.id).selectAll()
             } else {
                 Mails.slice(Mails.id).select { Mails.mailbox eq mailbox }
+            }.
+            withDistinct().map {
+                it[Mails.id]
             }
-        }.withDistinct().map {
-            it[Mails.id]
         }
         val uuids : MutableList<UUID> = mutableListOf()
         for (result in results) {
@@ -202,5 +266,37 @@ class SQLiteMailstore : Mailstore {
                 it[Mails.server_id]
             }
         }
+    }
+
+    fun getMailSummarys(mailbox: String) : List<MailSummary> {
+        val temp = mutableListOf<MailSummary>()
+        val result  = transaction {
+            if (mailbox == "") {
+                Mails.selectAll() //TODO slice
+            } else {
+                Mails.select { Mails.mailbox eq mailbox }
+            }.forEach {
+                val id = it[Mails.id].value
+                val from = it[Mails.from]
+                val to = it[Mails.to]
+                val subject = it[Mails.subject]
+                val date = it[Mails.date]
+                val unseen = !isFlagSet(it[Mails.flags], IMAPFlags.SEEN)
+                temp.add(MailSummary(from, to, subject, date, id, unseen))
+            }
+        }
+        return temp
+    }
+
+    fun getMIMEMail(uuid: UUID): MIMEMail {
+        val temp_list = mutableListOf<MIMEMail>()
+        transaction {
+            Mails.slice(Mails.raw_header, Mails.content).select{ Mails.id eq uuid}.first {
+                val header = it[Mails.raw_header]
+                val content = it[Mails.content]
+                temp_list.add(MIMEMail("$header\n\n$content"))
+            }
+        }
+        return temp_list[0]
     }
 }

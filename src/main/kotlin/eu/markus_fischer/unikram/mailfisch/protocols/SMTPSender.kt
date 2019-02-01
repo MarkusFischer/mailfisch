@@ -215,7 +215,7 @@ class SMTPSender(var hostname: String,
             !(mail.hasHeader("sender"))) {
             return false //multiple from but no sender given
         }
-        val smtp_from = if (mail.hasHeader("sender")) (mail.getHeader("sender") as HeaderValueAddressList).address_list[0].getMailboxes()[0]
+        val smtp_from = if (mail.hasHeader("sender")) (mail.getHeader("sender").value as HeaderValueAddressList).address_list[0].getMailboxes()[0]
                                 else (mail.getHeader("from").value as HeaderValueAddressList).address_list[0].mailbox
         val smtp_rcpt_to : MutableList<Mailbox> = mutableListOf()
         val smtp_rcpt_to_bcc : MutableList<Mailbox> = mutableListOf()

@@ -7,7 +7,7 @@ enum class IMAPFlags(val bitmask : Int) {
     FLAGGED(0x04),
     DELETED(0x08),
     DRAFT(0x10),
-    RECENT(0x20);
+    RECENT(0x20)
 }
 
 fun isFlagSet(flagvalue : Int, flag : IMAPFlags) : Boolean {
@@ -20,10 +20,27 @@ fun toggleFlag(flagvalue: Int, flag: IMAPFlags) : Int {
 
 fun getSettedFlags(flagvalue: Int) : List<IMAPFlags> {
     val settedFlags = mutableListOf<IMAPFlags>()
-    for (i in 0..IMAPFlags.values().size - 1) {
-        settedFlags.add((flagvalue and (1 shl i)) as IMAPFlags)
+    val possible_values = IMAPFlags.values()
+    for (i in 0..possible_values.size - 1) {
+        val flag =flagvalue and (1 shl i)
+        when (flag) {
+            IMAPFlags.SEEN.bitmask -> {settedFlags.add(IMAPFlags.SEEN)}
+            IMAPFlags.RECENT.bitmask -> {settedFlags.add(IMAPFlags.RECENT)}
+            IMAPFlags.DELETED.bitmask -> {settedFlags.add(IMAPFlags.DELETED)}
+            IMAPFlags.ANSWERED.bitmask -> {settedFlags.add(IMAPFlags.ANSWERED)}
+            IMAPFlags.DRAFT.bitmask -> {settedFlags.add(IMAPFlags.DRAFT)}
+            IMAPFlags.FLAGGED.bitmask -> {settedFlags.add(IMAPFlags.FLAGGED)}
+        }
     }
     return settedFlags.toList()
+}
+
+fun transformFlagListToInt(flags : List<IMAPFlags>) : Int {
+    var temp = 0x00
+    for (flag in flags) {
+        temp = toggleFlag(temp, flag)
+    }
+    return temp
 }
 
 class IMAPReceiver {

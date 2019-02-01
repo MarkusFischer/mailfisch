@@ -29,6 +29,25 @@ class BasicData : View("Basic Data") {
                                                           account.default_username,
                                                           account.default_password)
 
+    override val configPath = app.configBasePath.resolve("app.config")
+
+    override fun onSave() {
+        with(config) {
+            set("displayname", account.displayname.value)
+            set("address", account.emailaddress.value)
+            set("user", account.default_username.value)
+            set("password", account.default_password.value)
+            save()
+        }
+    }
+
+    init {
+        account.displayname.value = config.string("displayname")
+        account.emailaddress.value = config.string("address")
+        account.default_username.value = config.string("user")
+        account.default_password.value = config.string("password")
+    }
+
 }
 
 class POP3Data : View("POP3 Data") {
@@ -77,6 +96,37 @@ class POP3Data : View("POP3 Data") {
             account.pop3_server_port,
             account.pop3_security)
 
+    override val configPath = app.configBasePath.resolve("app.config")
+
+    override fun onSave() {
+        with(config) {
+            set("pop3server", account.pop3_server.value)
+            set("pop3port", account.pop3_server_port.value.toString())
+            if (account.pop3_override_credentials.value) {
+                set("pop3user", account.pop3_username.value)
+                set("pop3password", account.pop3_password.value)
+            } else {
+                set("pop3user", account.default_username.value)
+                set("pop3password", account.default_password.value)
+            }
+            set("pop3security", account.pop3_security.value.toString())
+            save()
+        }
+    }
+
+    init {
+        account.pop3_server.value = config.string("pop3server")
+        account.pop3_server_port.value = config.int("pop3port")
+        account.pop3_username.value = config.string("pop3user")
+        account.pop3_password.value = config.string("pop3password")
+
+        when (config.string("pop3security")) {
+            "SSL" -> account.pop3_security.value = Account.POP3Security.SSL
+            "STARTTLS" -> account.pop3_security.value = Account.POP3Security.STARTTLS
+            else -> account.pop3_security.value = Account.POP3Security.None
+        }
+    }
+
 }
 
 class SMTPData : View("SMTP Data") {
@@ -121,6 +171,37 @@ class SMTPData : View("SMTP Data") {
     override val complete = account.valid(account.smtp_server,
             account.smtp_server_port,
             account.smtp_security)
+
+    override val configPath = app.configBasePath.resolve("app.config")
+
+    override fun onSave() {
+        with(config) {
+            set("smtpserver", account.smtp_server.value)
+            set("smtpport", account.smtp_server_port.value.toString())
+            set("smtpsecurity", account.smtp_security.value.toString())
+            if (account.smtp_override_credentials.value) {
+                set("smtpuser", account.smtp_username.value)
+                set("smtppassword", account.smtp_password.value)
+            } else {
+                set("smtpuser", account.default_username.value)
+                set("smtppassword", account.default_password.value)
+            }
+            save()
+        }
+    }
+
+    init {
+        account.smtp_server.value = config.string("smtpserver")
+        account.smtp_server_port.value = config.int("smtpport")
+        account.smtp_username.value = config.string("smtpuser")
+        account.smtp_password.value = config.string("smtppassword")
+
+        when (config.string("smtpsecurity")) {
+            "SSL" -> account.smtp_security.value = Account.SMTPSecurity.SSL
+            "STARTTLS" -> account.smtp_security.value = Account.SMTPSecurity.STARTTLS
+            else -> account.smtp_security.value = Account.SMTPSecurity.None
+        }
+    }
 }
 
 class AccountCreateWizard : Wizard("Accountwizard") {
@@ -135,4 +216,5 @@ class AccountCreateWizard : Wizard("Accountwizard") {
         add(POP3Data::class)
         add(SMTPData::class)
     }
+
 }

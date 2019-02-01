@@ -31,28 +31,31 @@ class POP3Receiver(var hostname: String,
                 try {
                     socket = SSLSocketFactory.getDefault().createSocket(hostname, port)
                     (socket as SSLSocket).startHandshake()
-                    connected = true
                     use_tls = true
                 } catch (e : Exception) {
                     e.printStackTrace()
                     connected = false
+                    return false
                 }
             } else {
                 try {
                     socket = Socket(hostname, port)
-                    connected = true
                     use_tls = false
                 } catch (e : Exception) {
                     e.printStackTrace()
                     connected = false
+                    return false
                 }
             }
         }
-        input_stream = BufferedReader(InputStreamReader(socket?.getInputStream()))
-        output_stream = PrintStream(socket?.getOutputStream())
-        val pop3_status_indicator = input_stream?.readLine()?.substring(0, 4)
-        if (pop3_status_indicator == "+OK ") {
-            return true
+        if(socket != null) {
+            input_stream = BufferedReader(InputStreamReader(socket?.getInputStream()))
+            output_stream = PrintStream(socket?.getOutputStream())
+            val pop3_status_indicator = input_stream?.readLine()?.substring(0, 4)
+            if (pop3_status_indicator == "+OK ") {
+                connected = true
+                return true
+            }
         }
         connected = false
         return false
