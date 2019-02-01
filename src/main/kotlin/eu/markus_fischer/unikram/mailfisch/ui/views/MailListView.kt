@@ -22,22 +22,10 @@ class MailListView : View("MailListView") {
             button("Retrieve new mails").action { runAsync { controller.retriveNewMails() } }
         }
         center= borderpane{
-                prefHeight = 300.0
                 top=tableview(controller.mail_summary_list) {
                     isEditable = true
+                    prefHeight = 400.0
                     column("Unseen", MailSummary::unseenProperty).makeEditable()
-                    readonlyColumn("Subject", MailSummary::subject).cellFormat {
-                        text = it
-                        if (this.rowItem.unseen) {
-                            style {
-                                fontWeight = FontWeight.BOLD
-                            }
-                        } else {
-                            style {
-                                fontWeight = FontWeight.NORMAL
-                            }
-                        }
-                    }
                     readonlyColumn("From", MailSummary::from).cellFormat {
                         text = it
                         if (this.rowItem.unseen) {
@@ -50,7 +38,7 @@ class MailListView : View("MailListView") {
                             }
                         }
                     }
-                    readonlyColumn("To", MailSummary::to).cellFormat {
+                    /*readonlyColumn("To", MailSummary::to).cellFormat {
                         text = it
                         if (this.rowItem.unseen) {
                             style {
@@ -61,9 +49,21 @@ class MailListView : View("MailListView") {
                                 fontWeight = FontWeight.NORMAL
                             }
                         }
-                    }
+                    }*/
                     readonlyColumn("Date", MailSummary::date).cellFormat {
                         text = it.toString()
+                        if (this.rowItem.unseen) {
+                            style {
+                                fontWeight = FontWeight.BOLD
+                            }
+                        } else {
+                            style {
+                                fontWeight = FontWeight.NORMAL
+                            }
+                        }
+                    }
+                    readonlyColumn("Subject", MailSummary::subject).cellFormat {
+                        text = it
                         if (this.rowItem.unseen) {
                             style {
                                 fontWeight = FontWeight.BOLD
@@ -111,6 +111,7 @@ class MailListView : View("MailListView") {
     fun update_treeview(folder : MailFolder) {
         root.left =  treeview<MailFolder> {
             prefHeight = 300.0
+            useMaxHeight = true
             root = TreeItem(folder)
             root.isExpanded = true
             cellFormat { text = it.name }

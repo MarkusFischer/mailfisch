@@ -28,10 +28,7 @@ class MainWindow : View("Mailfisch - Hauptfenster") {
     }
 
     init {
-        with (root) {
-            prefWidth = 1200.0
-            prefHeight = 500.0
-        }
+
     }
 
 }
