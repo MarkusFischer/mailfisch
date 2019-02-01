@@ -11,7 +11,7 @@ fun removeRFC5322Comments(string_with_comments : String) : String {
     var unquoted_open_bracket_pos = -1
     var inside_quote = false
     var escape_sequence_beginning = false
-    var comments_to_remove_pos_list : MutableList<Pair<Int, Int>> = mutableListOf()
+    val comments_to_remove_pos_list : MutableList<Pair<Int, Int>> = mutableListOf()
     for (i in 0..string_with_comments.length - 1) {
         when(string_with_comments[i]) {
             '\"' -> {
@@ -43,7 +43,6 @@ fun removeRFC5322Comments(string_with_comments : String) : String {
                             comments_to_remove_pos_list.add(Pair(unquoted_open_bracket_pos, i))
                             unquoted_open_bracket = false
                         } else {
-                            //TODO what to do with unvalid comment
                         }
                     }
                 } else {
@@ -76,7 +75,7 @@ fun getCharPositions(raw_string : String,
     var insideAngleBrackets = false
     var insideRoundBrackets = false
     var escapeSequence = false
-    var positionList : MutableList<Int> = mutableListOf()
+    val positionList : MutableList<Int> = mutableListOf()
     for (i in 1..raw_string.length - 1) {
         when (raw_string[i]) {
             '<', '>' -> {

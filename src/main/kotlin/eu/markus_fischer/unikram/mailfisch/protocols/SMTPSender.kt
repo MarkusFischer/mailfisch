@@ -63,7 +63,7 @@ class SMTPSender(var hostname: String,
         val pop3_status_indicator = input_stream?.readLine()?.substring(0, 3)
         when(pop3_status_indicator) {
             "220" -> return true
-            "554" -> return false //todo do something
+            "554" -> return false
             else -> return false
         }
     }
@@ -120,7 +120,7 @@ class SMTPSender(var hostname: String,
         if (use_starttls) {
             if (esmtp && supported_features.contains("starttls")) {
                 startTLS()
-                var (s, l) = sendCommand("EHLO", InetAddress.getLocalHost().getHostName())
+                val (s, l) = sendCommand("EHLO", InetAddress.getLocalHost().getHostName())
                 when (s) {
                     250 -> {
                         supported_features = mutableListOf()
@@ -151,13 +151,11 @@ class SMTPSender(var hostname: String,
     }
 
     override fun authenticate(user: String, password: String): Boolean {
-        //TODO better authentication method regnotion
-        var login = false
+        val login = false
         var auth = false
         for (feature in supported_features) {
             if (feature.contains("auth", true)) {
                 auth = true
-                //TODO implement login
                 //login = feature.contains("login", true)
             }
         }
@@ -166,8 +164,7 @@ class SMTPSender(var hostname: String,
                 return false
             } else {
                 //PLAIN must be supported
-                //TODO do something with other status codes
-                var plain_login = user+'\u0000'+user+'\u0000'+password
+                val plain_login = user+'\u0000'+user+'\u0000'+password
                 when(sendCommand("auth plain", Base64.getEncoder().encodeToString(plain_login.toByteArray())).first) {
                     235 -> return true
                     432 -> return false //missing password
@@ -181,7 +178,6 @@ class SMTPSender(var hostname: String,
             }
         } else {
             //SMTP after POP
-            //TODO implement SMTP after POP
             return false
         }
     }
@@ -260,13 +256,12 @@ class SMTPSender(var hostname: String,
         if (to.isEmpty() || raw_mail.isBlank()) {
             throw IllegalArgumentException("Parameters shouldn't be empty")
         }
-        var (status, lines) = sendCommand("MAIL", "FROM:<${from.getMailAddress()}>")
+        val (status, lines) = sendCommand("MAIL", "FROM:<${from.getMailAddress()}>")
         if (status == 250) {
             for (mailbox in to) {
-                var (stat, lin) = sendCommand("RCPT", "TO:<${mailbox.getMailAddress()}>")
-                var error =when (stat) {
+                val (stat, lin) = sendCommand("RCPT", "TO:<${mailbox.getMailAddress()}>")
+                val error =when (stat) {
                     250, 251 -> false
-                    //TODO parse other error codes
                     /*552, 554, 451, 452, 503 -> true //storage or general related errors
                     450, 550 -> true //command rejected for policy reasons*/
                     else -> true
@@ -275,9 +270,9 @@ class SMTPSender(var hostname: String,
                     throw RuntimeException(lin.toString())
                 }
             }
-            var (stat, line) = sendCommand("DATA")
+            val stat = sendCommand("DATA").first
             if (stat == 354) {
-                var (s, l) = sendCommand("$raw_mail\r\n.\r\n")
+                val (s, l) = sendCommand("$raw_mail\r\n.\r\n")
                 if (s != 250) {
                     throw RuntimeException("Something went wrong during data transmission. Exception given from Server: ${l.toString()}")
                 }

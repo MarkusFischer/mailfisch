@@ -142,7 +142,6 @@ class POP3Receiver(var hostname: String,
         if (connected && sendCommand("QUIT").first) {
             mail_marked_for_deletion = false
             connected = false
-            //TODO work around to fix hanging quit when quit was called twice
             return true
         } else {
             return false
@@ -177,7 +176,7 @@ class POP3Receiver(var hostname: String,
 
     fun storeMail(id : Int, mailstore: Mailstore) : Boolean {
         val (success, mail) = getMail(id)
-        val (suc, uid) = getUID(id)
+        val uid = getUID(id).second
         val defaultFlags = (0x00 or IMAPFlags.RECENT.bitmask)
         val mailbox = "inbox"
         if (success)

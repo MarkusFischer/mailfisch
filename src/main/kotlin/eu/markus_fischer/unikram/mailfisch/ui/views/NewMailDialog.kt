@@ -49,7 +49,7 @@ class NewMailDialog : Fragment("New Mail") {
                     //Build mail object
                     val mail = MIMEMail()
                     mail.addHeader("subject", subjectProperty.value)
-                    mail.addHeader("from", fromProperty.value)//todo replace hardcoded value
+                    mail.addHeader("from", fromProperty.value)
                     mail.addHeader("to", toProperty.value)
                     mail.addHeader("cc", ccProperty.value ?: "")
                     mail.addHeader("bcc", bccProperty.value ?: "")
@@ -76,7 +76,7 @@ class NewMailDialog : Fragment("New Mail") {
                 button("Save").action {
                     val mail = MIMEMail()
                     mail.addHeader("subject", subjectProperty.value)
-                    mail.addHeader("from", fromProperty.value)//todo replace hardcoded value
+                    mail.addHeader("from", fromProperty.value)
                     mail.addHeader("to", toProperty.value)
                     mail.addHeader("cc", ccProperty.value ?: "")
                     mail.addHeader("bcc", bccProperty.value ?: "")
@@ -99,7 +99,7 @@ class NewMailDialog : Fragment("New Mail") {
                     close()
                 }
                 button("Attach"){}.action{
-                    var files = chooseFile("Attach file...", emptyArray(), mode=FileChooserMode.Multi)
+                    val files = chooseFile("Attach file...", emptyArray(), mode=FileChooserMode.Multi)
                     for (file in files) {
                         attachmentList.add(file.absolutePath)
                     }
@@ -119,7 +119,7 @@ class NewMailDialog : Fragment("New Mail") {
                             textfield() {
                                 fromProperty.value = "\"${config.string("displayname")}\" <${config.string("address")}>"
                                 isEditable = false
-                            }.bind(fromProperty, converter = DefaultStringConverter()) //TODO preload from config
+                            }.bind(fromProperty, converter = DefaultStringConverter())
                         }
                         field("To") {
                             textfield() {

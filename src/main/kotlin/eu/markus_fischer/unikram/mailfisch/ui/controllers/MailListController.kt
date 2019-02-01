@@ -123,7 +123,7 @@ class MailListController : Controller() {
         showed_mail.to = ""
         showed_mail.subject = ""
         showed_mail.content = ""
-        showed_mail.uuid = UUID.randomUUID() //TODO err uuid
+        showed_mail.uuid = UUID.randomUUID()
         showed_mail.attachmentList.clear()
 
     }

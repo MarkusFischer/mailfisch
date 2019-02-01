@@ -27,7 +27,7 @@ class MailListView : View("MailListView") {
                     isEditable = true
                     column("Unseen", MailSummary::unseenProperty).makeEditable()
                     readonlyColumn("Subject", MailSummary::subject).cellFormat {
-                        text = it.toString()
+                        text = it
                         if (this.rowItem.unseen) {
                             style {
                                 fontWeight = FontWeight.BOLD
@@ -39,7 +39,7 @@ class MailListView : View("MailListView") {
                         }
                     }
                     readonlyColumn("From", MailSummary::from).cellFormat {
-                        text = it.toString()
+                        text = it
                         if (this.rowItem.unseen) {
                             style {
                                 fontWeight = FontWeight.BOLD
@@ -51,7 +51,7 @@ class MailListView : View("MailListView") {
                         }
                     }
                     readonlyColumn("To", MailSummary::to).cellFormat {
-                        text = it.toString()
+                        text = it
                         if (this.rowItem.unseen) {
                             style {
                                 fontWeight = FontWeight.BOLD
@@ -168,7 +168,6 @@ class MailListView : View("MailListView") {
                                     find<NewMailDialog>(mapOf(NewMailDialog::type to NewMailDialog.Type.Reply_all, NewMailDialog::related_mail to SQLiteMailstore().getMIMEMail(controller.showed_mail.uuid))).openWindow(stageStyle = StageStyle.UTILITY)
                                 }
                                 button("Forward") {}.action {
-                                    //TODO keep attachments on forward
                                     find<NewMailDialog>(mapOf(NewMailDialog::type to NewMailDialog.Type.Forward, NewMailDialog::related_mail to SQLiteMailstore().getMIMEMail(controller.showed_mail.uuid))).openWindow(stageStyle = StageStyle.UTILITY)
                                 }
                                 button("Delete") {}.action {
@@ -186,7 +185,6 @@ class MailListView : View("MailListView") {
                 listview(controller.showed_mail.attachmentList) {
                     prefHeight = 100.0
                     selectionModel.selectionMode = SelectionMode.SINGLE
-                    //TODO show only file names
                     contextmenu {
                         item("Save...").action {
                             val selectItem = selectionModel.selectedItem
