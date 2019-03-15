@@ -41,7 +41,7 @@ class MailListController : Controller() {
 
     override val configPath = app.configBasePath.resolve("app.config")
 
-    var mailbox_list : MailFolder = buildMailFoldersOutOfList(config.string("address"), SQLiteMailstore().getMailboxes())
+    var mailbox_list : MailFolder = buildMailFoldersOutOfList(config.string("address") ?: "", SQLiteMailstore().getMailboxes())
 
     var mail_summary_list = SQLiteMailstore().getMailSummarys("inbox").observable()
 

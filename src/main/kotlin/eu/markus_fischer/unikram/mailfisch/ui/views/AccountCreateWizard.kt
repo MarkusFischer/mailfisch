@@ -42,10 +42,12 @@ class BasicData : View("Basic Data") {
     }
 
     init {
-        account.displayname.value = config.string("displayname")
-        account.emailaddress.value = config.string("address")
-        account.default_username.value = config.string("user")
-        account.default_password.value = config.string("password")
+        if (!config.isEmpty) {
+            account.displayname.value = config.string("displayname") ?: ""
+            account.emailaddress.value = config.string("address") ?: ""
+            account.default_username.value = config.string("user") ?: ""
+            account.default_password.value = config.string("password") ?: ""
+        }
     }
 
 }
@@ -115,15 +117,17 @@ class POP3Data : View("POP3 Data") {
     }
 
     init {
-        account.pop3_server.value = config.string("pop3server")
-        account.pop3_server_port.value = config.int("pop3port")
-        account.pop3_username.value = config.string("pop3user")
-        account.pop3_password.value = config.string("pop3password")
+        if (!config.isEmpty) {
+            account.pop3_server.value = config.string("pop3server") ?: ""
+            account.pop3_server_port.value = config.int("pop3port") ?: 0
+            account.pop3_username.value = config.string("pop3user") ?: ""
+            account.pop3_password.value = config.string("pop3password") ?: ""
 
-        when (config.string("pop3security")) {
-            "SSL" -> account.pop3_security.value = Account.POP3Security.SSL
-            "STARTTLS" -> account.pop3_security.value = Account.POP3Security.STARTTLS
-            else -> account.pop3_security.value = Account.POP3Security.None
+            when (config.string("pop3security")) {
+                "SSL" -> account.pop3_security.value = Account.POP3Security.SSL
+                "STARTTLS" -> account.pop3_security.value = Account.POP3Security.STARTTLS
+                else -> account.pop3_security.value = Account.POP3Security.None
+            }
         }
     }
 
@@ -191,15 +195,17 @@ class SMTPData : View("SMTP Data") {
     }
 
     init {
-        account.smtp_server.value = config.string("smtpserver")
-        account.smtp_server_port.value = config.int("smtpport")
-        account.smtp_username.value = config.string("smtpuser")
-        account.smtp_password.value = config.string("smtppassword")
+        if (!config.isEmpty) {
+            account.smtp_server.value = config.string("smtpserver") ?: ""
+            account.smtp_server_port.value = config.int("smtpport") ?: 0
+            account.smtp_username.value = config.string("smtpuser") ?: ""
+            account.smtp_password.value = config.string("smtppassword") ?: ""
 
-        when (config.string("smtpsecurity")) {
-            "SSL" -> account.smtp_security.value = Account.SMTPSecurity.SSL
-            "STARTTLS" -> account.smtp_security.value = Account.SMTPSecurity.STARTTLS
-            else -> account.smtp_security.value = Account.SMTPSecurity.None
+            when (config.string("smtpsecurity")) {
+                "SSL" -> account.smtp_security.value = Account.SMTPSecurity.SSL
+                "STARTTLS" -> account.smtp_security.value = Account.SMTPSecurity.STARTTLS
+                else -> account.smtp_security.value = Account.SMTPSecurity.None
+            }
         }
     }
 }
